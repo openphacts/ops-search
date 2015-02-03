@@ -10,7 +10,7 @@ except ex:
     import ijson
 
 from urllib.request import FancyURLopener
-from urllib.parse import urljoin, quote
+from urllib.parse import urljoin, quote, urlencode, urlencode, urlencode, urlencode
 
 ENDPOINT="http://ops2.few.vu.nl:3030/chembl19/sparql"
 TIMEOUT=30*60 # 30 minutes
@@ -40,8 +40,8 @@ WHERE {
 """
 
 
-SPARQL = urljoin(ENDPOINT, "?query=%s&timeout=%s" % (
-            quote(QUERY), TIMEOUT))
+SPARQL = urljoin(ENDPOINT, 
+            "?" + urlencode(dict(query=QUERY, timeout=TIMEOUT)))
 
 
 es = Elasticsearch()# host="elasticsearch")
