@@ -13,7 +13,7 @@ from urllib.request import FancyURLopener
 from urllib.parse import urljoin, quote, urlencode, urlencode, urlencode, urlencode
 
 ENDPOINT="http://ops2.few.vu.nl:3030/chembl19/sparql"
-TIMEOUT=30*60 # 30 minutes
+TIMEOUT=2*60*60 # 2 hours
 QUERY="""
 PREFIX chembl: <http://rdf.ebi.ac.uk/terms/chembl#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
