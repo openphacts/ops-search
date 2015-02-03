@@ -3,7 +3,45 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 import json
 import time
-import ijson
+try:
+    import ijson.backends.yajl2 as ijson
+except ex:
+    print("Can't find yajl2, JSON parsing will be slower")
+    import ijson
+
+from urllib.request import FancyURLopener
+from urllib.parse import urljoin, quote
+
+ENDPOINT="http://ops2.few.vu.nl:3030/chembl19/sparql"
+TIMEOUT=30*60 # 30 minutes
+QUERY="""
+PREFIX chembl: <http://rdf.ebi.ac.uk/terms/chembl#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+
+SELECT *
+WHERE {
+  GRAPH <http://rdf.ebi.ac.uk/terms/chembl> {
+    ?substanceType a owl:Class.
+    ?substanceType rdfs:subClassOf+ chembl:Substance .
+  }  
+  ?substance a ?substanceType.
+  ?substance rdfs:label ?label .
+  OPTIONAL { ?substance dct:title ?title }
+  OPTIONAL { ?substance dc:title ?title2 }      
+  OPTIONAL { ?substance rdfs:description ?desc } 
+  OPTIONAL { ?substance skos:prefLabel ?prefLabel } 
+  OPTIONAL { ?substance skos:altLabel ?altLabel }   
+}
+"""
+
+
+SPARQL = urljoin(ENDPOINT, "?query=%s&timeout=%s" % (
+            quote(QUERY), TIMEOUT))
 
 
 es = Elasticsearch()# host="elasticsearch")
@@ -46,35 +84,34 @@ def binding_as_doc(node):
     label = node["label"]["value"]
     prefLabel = node["label"]["value"]
     if not "altLabel" in node:
-        print("Straaaaaaaaaange", node)
+    #    print("Straaaaaaaaaange", node)
         altLabel = None
     else:
         altLabel = node["altLabel"]["value"]
     if uri not in altLabels: 
         body = {
-                    "_index": "chembl19",
-                    "_type": "substance",
-                    "_id": uri,
-                    "_source": {
                             "@id": uri,
                             "@type": [substanceType, "chembl:Substance"],
                             "label": label,
                             "prefLabel": prefLabel,
-                            "altLabel": [altLabel] ## to allow later additions
-                    }
+                            }
+        if altLabel:
+            body["altLabel"] = [altLabel]
+        msg = {
+                    "_index": "chembl19",
+                    "_type": "substance",
+                    "_id": uri,
+                    "_source": body
                 }
-        #q.put(body)
-        #es.index(index="chembl19", doc_type="substance", id=uri, body=body)
-        #print("+", uri)
         altLabels[uri] = set([altLabel])
-        return body
+        return msg
     else:
         labels = altLabels[uri]
         if altLabel in labels:
                 print("Something else changed", uri)
                 return None # skip
         labels.add(altLabel)
-        body = {
+        msg = {
             "_op_type": "update",
             "_index": "chembl19",
             "_type": "substance",
@@ -83,17 +120,18 @@ def binding_as_doc(node):
               "altLabel": list(labels)
               }
             }
-        #es.update(index="chembl19", doc_type="substance", id=uri, body=body)
-        #print("*", uri)
-        #q.put(body)
-        return body
+        return msg
 
 
+urlOpener = FancyURLopener()
+urlOpener.addheader("Accept", "application/sparql-results+json, applicaton/json;q=0.1")
 
 def json_reader():
-    with open("substance.json", mode="rb") as jsonFile:
+    with urlOpener.open(SPARQL) as jsonFile:
+    #with open("substance.json", mode="rb") as jsonFile:
         bindings = ijson.items(jsonFile, "results.bindings.item")
         for binding in bindings:
+#            print(".", end="", sep="", flush=True)
             n = binding_as_doc(binding)
             if n is not None:
                 yield n
