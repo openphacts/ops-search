@@ -10,7 +10,7 @@ prefixes:
   dc: http://purl.org/dc/elements/1.1/
   skos: http://www.w3.org/2004/02/skos/core#
   dbpedia: http://dbpedia.org/ontology/
-  dbprop: http://dbpedia.org/proeprty/
+  dbprop: http://dbpedia.org/property/
 
 
 sparql:
@@ -27,17 +27,17 @@ indexes:
     person:
         type: foaf:Person
         properties:
-          - foaf:givenName
-          - foaf:surname
-          - dc:description
-          - dbprop:shortDescription
-          - dbprop:dateOfBirth
+#          - foaf:givenName
+#          - foaf:surname
+#          - dc:description
+#          - dbprop:shortDescription
+#          - dbprop:dateOfBirth
           - dbpedia:abstract
     athlete:
         type: dbpedia:Athlete
         subclasses: owl
         properties:
-          - dbprop:alternativeNames
-          - dbprop:fullname
-          - dbprop:goals
+#          - dbprop:alternativeNames
+#          - dbprop:fullname
+#          - dbprop:goals
           - dbpedia:abstract
