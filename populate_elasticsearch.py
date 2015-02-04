@@ -19,6 +19,11 @@ except ex:
 REPORT_EVERY=1200
 DEFAULT_SPARQL_TIMEOUT=60
 
+# SPARQL variable name for the resource
+ID="id"
+# and for the rdf:type (on subclasses)
+TYPE="type"
+
 ## TODO: Parameterize the config
 with open("config.yaml") as f:
     conf = yaml.load(f)
@@ -37,7 +42,6 @@ def sparql_prefixes():
 
 
 class Indexer:
-
     es_hosts = conf.get("elasticsearch", None)
     es = Elasticsearch(es_hosts)
 
@@ -52,6 +56,7 @@ class Indexer:
         self.indexed = set()
         self.reset_stats()
         self.properties = {}
+        self.blanknodes = {}
 
     def reset_stats(self):
         self.count = 0
@@ -70,19 +75,20 @@ class Indexer:
         return name
 
     def sparql_property(self, prop):
-        return "    ?uri %s ?%s ." % (prop, self.variable_for_property(prop))
+        return "    ?%s %s ?%s ." % (ID, prop, self.variable_for_property(prop))
 
     def sparql(self):
         sparql = []
         sparql.append(sparql_prefixes())
         sparql.append("SELECT *")
         sparql.append("WHERE {")
+
         if "graph" in self.conf:
             sparql.append(" GRAPH <%s> {" % self.conf["graph"])
 
         optionals = False
         if "type" in self.conf:
-            sparql.append("   ?uri a %s ." % self.conf["type"])
+            sparql.append("   ?%s a %s ." % (ID, self.conf["type"]))
             optionals = True
         properties = []
 
@@ -92,10 +98,11 @@ class Indexer:
             properties.extend(self.conf["properties"])
 
         if not properties:
-            raise Exception("No properties for %s %s" % (self.index, self.doc_type))
+            raise Exception("No properties configured for %s %s" % (self.index, self.doc_type))
 
         print("Properties:\n  ", " ".join(properties))
         sparql.extend(map(self.sparql_property, properties))
+
 
         if "graph" in self.conf:
             sparql.append(" }")
@@ -108,21 +115,29 @@ class Indexer:
         return sparqlStr
 
     def sparqlURL(self):
+        timeout = int(conf["sparql"].get("timeout_s",
+                        DEFAULT_SPARQL_TIMEOUT)) * 1000
         return urljoin(conf["sparql"]["uri"],
             "?" + urlencode(dict(query=self.sparql(),
-                            timeout=conf["sparql"].get("timeout_s",
-                                    DEFAULT_SPARQL_TIMEOUT))))
+                                 timeout=timeout)))
 
     def json_reader(self):
         url = self.sparqlURL()
         with self.urlOpener.open(url) as jsonFile:
-        #with open("substance.json", mode="rb") as jsonFile:
             bindings = ijson.items(jsonFile, "results.bindings.item")
             for binding in bindings:
-    #            print(".", end="", sep="", flush=True)
+                print(binding)
                 n = binding_as_doc(binding)
                 if n is not None:
+                    print(n)
                     yield n
+
+    def skolemize(self, bnode):
+        if bnode in self.blanknodes:
+            return self.blanknodes[bnode]
+        uri = uuid.uuid4().urn
+        self.blanknodes[bnode] = uri
+        return uri
 
     def binding_as_doc(self, node):
         # now, assume it's in sparql JSON format, e.g.
@@ -140,26 +155,45 @@ class Indexer:
             avgSpeed = self.count/(now-self.start)
             print("n=%s, speed=%0.1f/sec, avgSpeed=%0.1f/sec" % (count, speed, avgSpeed))
             self.lastCheck = now
-        uri = node["substance"]["value"]
-        substanceType = uri_to_qname(node["substanceType"]["value"])
 
-        if uri not in altLabels:
-            body = {
-                                "@id": uri,
-                                "@type": [substanceType, "chembl:Substance"],
-                                "label": label,
-                                "prefLabel": prefLabel,
-                                }
-            if altLabel:
-                body["altLabel"] = [altLabel]
-            msg = {
-                        "_index": "chembl19",
-                        "_type": "substance",
-                        "_id": uri,
-                        "_source": body
-                    }
-            altLabels[uri] = set([altLabel])
-            return msg
+
+        if node[ID]["type"] == "uri":
+            uri = node[ID]["value"]
+        else:
+            # a blank node, we need a new uri
+            uri = self.skolemize(node[ID]["value"])
+
+        body = { "@id": uri }
+
+        types = []
+        if "type" in self.conf:
+            types.add(self.conf["type"])
+        if TYPE in node:
+            types.add(node[TYPE])
+        if types:
+            body["@type"] = types
+
+        for var in node:
+            if var in (ID,TYPE):
+                continue
+            if node[var] is None or node.get("value") is None:
+                continue
+            body[var] = node[var]
+
+        ## TODO: Make mapping for JSON-LD
+
+        # Return ElasticSearch bulk message
+        doc_id = uri
+        self.indexed.add(uri)
+        # FIXME: What if it's already indexed? Need
+        # child documents?
+        msg = { "_index": self.index,
+                "_type": self.doc_type,
+                "_id": doc_id,
+                "_source": body
+              }
+
+        return msg
 
     def load(self):
         print("Index %s type %s" % (self.index, self.doc_type))
@@ -167,7 +201,6 @@ class Indexer:
         bulk(self.es, self.json_reader())
 
 def main(*args):
-
     for index in conf["indexes"]:
         try:
             es.indices.delete(index=index)
