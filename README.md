@@ -31,6 +31,12 @@ In Ubuntu 14.04, this easiest achieved using:
     sudo apt-get install git python3-pip libyajl2 python3-yaml 
     sudo pip3 install elasticsearch ijson yajl
 
+You will also need an [ElasticSearch](http://www.elasticsearch.org) installation. You can test it out with [Docker](https://www.docker.com/):
+
+    docker run --name elasticsearch -d -p 9200:9200 dockerfile/elasticsearch
+
+You can test this at: http://localhost:9200/_search?q=alice
+
 ## Running
 
 After modifying the [configuration](#Configuration), simply run:
