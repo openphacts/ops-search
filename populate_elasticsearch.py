@@ -127,7 +127,7 @@ class Indexer:
             bindings = ijson.items(jsonFile, "results.bindings.item")
             for binding in bindings:
                 print(binding)
-                n = binding_as_doc(binding)
+                n = self.binding_as_doc(binding)
                 if n is not None:
                     print(n)
                     yield n
@@ -164,12 +164,14 @@ class Indexer:
             uri = self.skolemize(node[ID]["value"])
 
         body = { "@id": uri }
-
+        ## TODO: IRI-ize any URIs with ASCII escapes, like
+        # http://dbpedia.org/resource/%C3%81ngel_Gim%C3%A9nez
+        # so they are also searchable
         types = []
         if "type" in self.conf:
-            types.add(self.conf["type"])
+            types.append(self.conf["type"])
         if TYPE in node:
-            types.add(node[TYPE])
+            types.append(node[TYPE])
         if types:
             body["@type"] = types
 
