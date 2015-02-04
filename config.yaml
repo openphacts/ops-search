@@ -16,7 +16,7 @@ prefixes:
 sparql:
   uri: http://dbpedia.org/sparql
   timeout_s: 60 # 1 minute
-  limit: 100 # for debugging we don't want to index everything :-)
+  limit: 1000 # for debugging we don't want to index everything :-)
 
 common_properties:
   - rdfs:label
@@ -27,15 +27,15 @@ indexes:
     person:
         type: foaf:Person
         properties:
-#          - foaf:givenName
-#          - foaf:surname
-#          - dc:description
-#          - dbprop:shortDescription
+          - foaf:givenName
+          - foaf:surname
+          - dc:description
+          - dbprop:shortDescription
           - dbprop:dateOfBirth
     athlete:
         type: dbpedia:Athlete
         subclasses: owl
         properties:
-#          - dbprop:alternativeNames
-#          - dbprop:fullname
+          - dbprop:alternativeNames
+          - dbprop:fullname
           - dbprop:goals
