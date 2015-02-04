@@ -31,6 +31,11 @@ In Ubuntu 14.04, this easiest achieved using:
     sudo apt-get install git python3-pip libyajl2 python3-yaml 
     sudo pip3 install elasticsearch ijson yajl
 
+## Running
+
+After modifying the [configuration](#Configuration), simply run:
+
+    python3 sparql_index.py
 
 ## Configuration
 
