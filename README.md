@@ -7,9 +7,11 @@ a configured [SPARQL service])(http://www.w3.org/TR/sparql11-protocol/).
 
 
 ## License
+License: [MIT license](http://opensource.org/licenses/MIT)
+
 (c) 2014-2015 University of Manchester, UK
-[MIT license](http://opensource.org/licenses/MIT)
-See [LICENSE.txt](LICENSE.txt) for details.
+
+See [LICENSE](LICENSE) for details.
 
 ## Installation
 
