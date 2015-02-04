@@ -2,13 +2,15 @@
 import sys
 import time
 import json
+import uuid
 from urllib.request import FancyURLopener
-from urllib.parse import urljoin, quote, urlencode, urlencode, urlencode, urlencode
+from urllib.parse import urljoin, quote, urlencode, unquote
 
 import yaml
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
+from elasticsearch.exceptions import NotFoundError
 
 try:
     import ijson.backends.yajl2 as ijson
@@ -40,14 +42,16 @@ def sparql_prefixes():
         sparql.append("PREFIX %s: <%s>" % (p,u))
     return "\n".join(sparql)
 
+es_hosts = conf.get("elasticsearch", None)
+es = Elasticsearch(es_hosts)
+
+urlOpener = FancyURLopener()
+urlOpener.addheader("Accept",
+    "application/sparql-results+json, applicaton/json;q=0.1")
+
 
 class Indexer:
-    es_hosts = conf.get("elasticsearch", None)
-    es = Elasticsearch(es_hosts)
 
-    urlOpener = FancyURLopener()
-    urlOpener.addheader("Accept",
-        "application/sparql-results+json, applicaton/json;q=0.1")
 
     def __init__(self, index, doc_type):
         self.index = index
@@ -111,7 +115,10 @@ class Indexer:
             sparql.append("LIMIT %s" % conf["sparql"]["limit"])
 
         sparqlStr = "\n".join(sparql)
+        print("SPARQL query:")
+        print()
         print(sparqlStr)
+        print()
         return sparqlStr
 
     def sparqlURL(self):
@@ -123,7 +130,7 @@ class Indexer:
 
     def json_reader(self):
         url = self.sparqlURL()
-        with self.urlOpener.open(url) as jsonFile:
+        with urlOpener.open(url) as jsonFile:
             bindings = ijson.items(jsonFile, "results.bindings.item")
             for binding in bindings:
                 print(binding)
@@ -133,21 +140,33 @@ class Indexer:
                     yield n
 
     def skolemize(self, bnode):
-        if bnode in self.blanknodes:
-            return self.blanknodes[bnode]
-        uri = uuid.uuid4().urn
-        self.blanknodes[bnode] = uri
-        return uri
+        if bnode not in self.blanknodes:
+            self.blanknodes[bnode] = uuid.uuid4()
+        return self.blanknodes[bnode].urn
+
+    def unescape(self, result):
+        value = result["value"]
+        if result["type"] == "uri":
+            ## Poor man's IRI parsing
+            ## Should really parse as rfc3987
+            return unquote(value)
+        return value
+
+    def update_script_for(self, body):
+        script=[]
+        for var in body:
+            if var.startswith("@"):
+                continue
+            script.append("if (! ctx._source.containsKey('%s')) {" % var)
+            script.append("  ctx._source.%s = [%s] " % (var,var))
+            script.append("} else ")
+            script.append("if (! ctx._source['%s'].contains(%s)) {" % (var,var))
+            script.append("  ctx._source['%s'] += %s" % (var,var))
+            script.append("}")
+
+        return "\n".join(script)
 
     def binding_as_doc(self, node):
-        # now, assume it's in sparql JSON format, e.g.
-    #{
-    #    "substanceType": { "type": "uri" , "value": "http://rdf.ebi.ac.uk/terms/chembl#Antibody" } ,
-    #    "substance": { "type": "uri" , "value": "http://rdf.ebi.ac.uk/resource/chembl/molecule/CHEMBL1201579" } ,
-    #    "label": { "type": "literal" , "value": "CAPROMAB PENDETIDE" } ,
-    #    "prefLabel": { "type": "literal" , "value": "CAPROMAB PENDETIDE" } ,
-    #    "altLabel": { "type": "literal" , "value": "CAPROMAB PENDETIDE" }
-    #}
         self.count += 1
         if (self.count % REPORT_EVERY == 0):
             now = time.time()
@@ -158,58 +177,70 @@ class Indexer:
 
 
         if node[ID]["type"] == "uri":
-            uri = node[ID]["value"]
+            uri = self.unescape(node[ID])
         else:
-            # a blank node, we need a new uri
+            # id is a blank node, we'll need to make a new id
             uri = self.skolemize(node[ID]["value"])
 
         body = { "@id": uri }
-        ## TODO: IRI-ize any URIs with ASCII escapes, like
-        # http://dbpedia.org/resource/%C3%81ngel_Gim%C3%A9nez
-        # so they are also searchable
+        params = {}
         types = []
         if "type" in self.conf:
             types.append(self.conf["type"])
         if TYPE in node:
-            types.append(node[TYPE])
+            types.append(node[TYPE]["value"])
+            params["__type"] = node[TYPE]["value"]
         if types:
             body["@type"] = types
+
 
         for var in node:
             if var in (ID,TYPE):
                 continue
-            if node[var] is None or node.get("value") is None:
-                continue
-            body[var] = node[var]
+            print(var, node[var])
 
-        ## TODO: Make mapping for JSON-LD
+            if node[var] is None or node[var].get("value") is None:
+                continue
+            value = node[var]["value"]
+            params[var] = value
+            body[var] = [ value ]
+
+        doc_id = uri
 
         # Return ElasticSearch bulk message
-        doc_id = uri
-        self.indexed.add(uri)
-        # FIXME: What if it's already indexed? Need
-        # child documents?
         msg = { "_index": self.index,
                 "_type": self.doc_type,
-                "_id": doc_id,
-                "_source": body
-              }
+                "_id": doc_id
+               }
 
+#        doc_uuid = uuid.uuid5(uuid.NAMESPACE_URL, uri)
+#        if not doc_uuid in self.indexed:
+#            self.indexed.add(doc_uuid)
+#            msg["_source"] = body
+#        else:
+        msg.update({
+                "_op_type": "update",
+                "script": self.update_script_for(body),
+                "params": params,
+                "upsert": body
+            })
+            # Or child documents?
         return msg
 
     def load(self):
         print("Index %s type %s" % (self.index, self.doc_type))
         self.reset_stats()
-        bulk(self.es, self.json_reader())
+        bulk(es, self.json_reader(), raise_on_error=True)
 
 def main(*args):
     for index in conf["indexes"]:
         try:
             es.indices.delete(index=index)
-        except:
+        except NotFoundError:
             pass
         for doc_type in conf["indexes"][index]:
             indexer = Indexer(index, doc_type)
+            ## TODO: Store mapping for JSON-LD
             indexer.load()
 
 
