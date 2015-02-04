@@ -1,9 +1,9 @@
 # openphacts-irs
 IRS2 data loading scripts
 
-Populates an [ElasticSearch](http://www.elasticsearch.org) instance with [JSON-LD])(http://www.w3.org/TR/json-ld/) 
-documents with searceable labels extracted from [SPARQL queries])(http://www.w3.org/TR/sparql11-query/) from
-a configured [SPARQL service])(http://www.w3.org/TR/sparql11-protocol/).
+Populates an [ElasticSearch](http://www.elasticsearch.org) instance with [JSON-LD](http://www.w3.org/TR/json-ld/) 
+documents with searceable labels extracted from [SPARQL queries](http://www.w3.org/TR/sparql11-query/) from
+a configured [SPARQL service](http://www.w3.org/TR/sparql11-protocol/).
 
 
 ## License
@@ -30,6 +30,12 @@ In Ubuntu 14.04, this easiest achieved using:
 
     sudo apt-get install git python3-pip libyajl2 python3-yaml 
     sudo pip3 install elasticsearch ijson yajl
+
+You will also need an [ElasticSearch](http://www.elasticsearch.org) installation. You can test it out with [Docker](https://www.docker.com/):
+
+    docker run --name elasticsearch -d -p 9200:9200 dockerfile/elasticsearch
+
+You can test this at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)
 
 ## Running
 
@@ -100,6 +106,8 @@ one of the defined [prefixes](#Prefixes).
 ### Indexes
 
 Each key under `indexes` specified will (re)create the corresponding [ElasticSearch index](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html).
+
+**NOTE**: Each index will be deleted before populating with new results.
 
 #### Types
 
