@@ -41,11 +41,15 @@ You can test this at: [http://localhost:9200/_search?q=alice](http://localhost:9
 
 After modifying the [configuration](#Configuration), simply run:
 
-    python3 sparql_index.py
+    python3 populate_elasticsearch.py
+
+You can specify an alternative config file as an argument:
+
+    python3 populate_elasticsearch.py openphacts.yaml
 
 ## Configuration
 
-You need to modify [config.yml](config.yml) to configure the ElasticSearch data loading. The configuration 
+You need to modify [config.yaml](config.yaml) to configure the ElasticSearch data loading. The configuration 
 file is read from the current directory when running the script.
 
 ### ElasticSearch
