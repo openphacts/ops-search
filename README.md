@@ -13,6 +13,23 @@ License: [MIT license](http://opensource.org/licenses/MIT)
 
 See [LICENSE](LICENSE) for details.
 
+The additional Python libraries used are:
+
+* [elasticsearch](https://pypi.python.org/pypi/elasticsearch/) ([Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0))
+* [ijson](https://pypi.python.org/pypi/ijson/) ([BSD license](https://github.com/isagalaev/ijson/blob/master/LICENSE.txt))
+* [PyYaml](https://pypi.python.org/pypi/pyaml/) ([WTFPL license](https://github.com/mk-fg/pretty-yaml/blob/master/COPYING))
+* [ijson](https://pypi.python.org/pypi/ijson/) ([BSD license](https://github.com/isagalaev/ijson/blob/master/LICENSE.txt))
+* [yajl](https://pypi.python.org/pypi/yajl) (optional) ([BSD license?](https://github.com/rtyler/py-yajl/issues/28))
+
+
 ## Installation
+
+You will need Python 3 and pip, in addition to some dependencies.
+
+In Ubuntu 14.04, this easiest achieved using:
+
+    sudo apt-get install git python3-pip libyajl2 python3-yaml 
+    sudo pip3 install elasticsearch ijson yajl
+
 
 ## Configuration
