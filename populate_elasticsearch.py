@@ -95,8 +95,8 @@ def binding_as_doc(node):
 
 class Populater:
 
-    es_host = conf.get("elasticsearch", {}).get("host", "localhost")
-    es = Elasticsearch(host=es_host)
+    es_hosts = conf.get("elasticsearch", None)
+    es = Elasticsearch(es_hosts)
 
     urlOpener = FancyURLopener()
     urlOpener.addheader("Accept", "application/sparql-results+json, applicaton/json;q=0.1")

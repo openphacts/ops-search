@@ -1,3 +1,10 @@
+
+elasticsearch:
+  - host: localhost
+    port: 9200
+#  - host: docker
+#    port: 9200
+
 prefixes:
   rdfs: http://www.w3.org/2000/01/rdf-schema#
   owl: http://www.w3.org/2002/07/owl#
@@ -12,11 +19,6 @@ sparql:
   #uri: http://ops2.few.vu.nl:3030/chembl19/sparql
   uri: http://ops2.few.vu.nl:8890/sparql
   timeout_s: 7200 # e.g. 2 hours
-
-
-elasticsearch:
-  host: localhost
-  # host: elasticsearch
 
 common_properties:
   - rdfs:label
