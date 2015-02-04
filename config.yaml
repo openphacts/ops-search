@@ -34,7 +34,6 @@ indexes:
           - dbprop:dateOfBirth
           - dbpedia:abstract
     athlete:
-        graph: http://www.openlinksw.com/schemas/virtrdf#
         type: dbpedia:Athlete
         subclasses: owl
         properties:
@@ -42,4 +41,3 @@ indexes:
           - dbprop:fullname
           - dbprop:goals
           - dbpedia:abstract
-
