@@ -35,7 +35,7 @@ You will also need an [ElasticSearch](http://www.elasticsearch.org) installation
 
     docker run --name elasticsearch -d -p 9200:9200 dockerfile/elasticsearch
 
-You can test this at: http://localhost:9200/_search?q=alice
+You can test this at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)
 
 ## Running
 
