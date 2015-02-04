@@ -94,7 +94,7 @@ class Indexer:
         if not properties:
             raise Exception("No properties for %s %s" % (self.index, self.doc_type))
 
-        print("Indexing properties ", properties)
+        print("Properties:\n  ", " ".join(properties))
         sparql.extend(map(self.sparql_property, properties))
 
         if "graph" in self.conf:
@@ -162,6 +162,7 @@ class Indexer:
             return msg
 
     def load(self):
+        print("Index %s type %s" % (self.index, self.doc_type))
         self.reset_stats()
         bulk(self.es, self.json_reader())
 
