@@ -107,6 +107,8 @@ one of the defined [prefixes](#Prefixes).
 
 Each key under `indexes` specified will (re)create the corresponding [ElasticSearch index](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html).
 
+**NOTE**: Each index will be deleted before populating with new results.
+
 #### Types
 
 Each index can contain multiple types. The below example creates the two indexes `customers` and `staff`, where the first index has two types, `orgs` and `people`, and the second only the type `people`. 
