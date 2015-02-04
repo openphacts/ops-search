@@ -31,13 +31,11 @@ indexes:
 #          - foaf:surname
 #          - dc:description
 #          - dbprop:shortDescription
-#          - dbprop:dateOfBirth
-          - dbpedia:abstract
+          - dbprop:dateOfBirth
     athlete:
         type: dbpedia:Athlete
         subclasses: owl
         properties:
 #          - dbprop:alternativeNames
 #          - dbprop:fullname
-#          - dbprop:goals
-          - dbpedia:abstract
+          - dbprop:goals
