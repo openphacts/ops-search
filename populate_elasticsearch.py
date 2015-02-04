@@ -9,58 +9,28 @@ except ex:
     print("Can't find yajl2, JSON parsing will be slower")
     import ijson
 
+import yaml
 from urllib.request import FancyURLopener
 from urllib.parse import urljoin, quote, urlencode, urlencode, urlencode, urlencode
 
-ENDPOINT="http://ops2.few.vu.nl:3030/chembl19/sparql"
-TIMEOUT=2*60*60 # 2 hours
-QUERY="""
-PREFIX chembl: <http://rdf.ebi.ac.uk/terms/chembl#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX dct: <http://purl.org/dc/terms/>
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+REPORT_EVERY=1200
 
 
-SELECT *
-WHERE {
-  GRAPH <http://rdf.ebi.ac.uk/terms/chembl> {
-    ?substanceType a owl:Class.
-    ?substanceType rdfs:subClassOf+ chembl:Substance .
-  }  
-  ?substance a ?substanceType.
-  ?substance rdfs:label ?label .
-  OPTIONAL { ?substance dct:title ?title }
-  OPTIONAL { ?substance dc:title ?title2 }      
-  OPTIONAL { ?substance rdfs:description ?desc } 
-  OPTIONAL { ?substance skos:prefLabel ?prefLabel } 
-  OPTIONAL { ?substance skos:altLabel ?altLabel }   
-}
-"""
+with open("config.yaml") as f:
+    conf = yaml.load(f)
 
-
-SPARQL = urljoin(ENDPOINT, 
-            "?" + urlencode(dict(query=QUERY, timeout=TIMEOUT)))
-
-
-es = Elasticsearch()# host="elasticsearch")
-try:
-        es.indices.delete(index="chembl19")
-except:
-        pass
-
-altLabels = {}
 
 def uri_to_qname(uri):
-    return uri.replace("http://rdf.ebi.ac.uk/terms/chembl#", "chembl:")
+    for p,u in conf.get("prefixes", {}).items():
+        if uri.startswith(u):
+            return uri.replace(u, p+":", 1)
+    return uri
 
-
-count = 0
-start = time.time()
-lastCheck = start
-
-REPORT_EVERY=1200
+def sparql_prefixes():
+    sparql=[]
+    for p,u in conf.get("prefixes", {}).items():
+        sparql.append("PREFIX %s: <%s>" % (p,u))
+    return "\n".join(sparql)
 
 def binding_as_doc(node):
     global count, lastCheck
@@ -71,7 +41,7 @@ def binding_as_doc(node):
 #    "label": { "type": "literal" , "value": "CAPROMAB PENDETIDE" } ,
 #    "prefLabel": { "type": "literal" , "value": "CAPROMAB PENDETIDE" } ,
 #    "altLabel": { "type": "literal" , "value": "CAPROMAB PENDETIDE" }
-#} 
+#}
     count += 1
     if (count % REPORT_EVERY == 0):
         now = time.time()
@@ -88,7 +58,7 @@ def binding_as_doc(node):
         altLabel = None
     else:
         altLabel = node["altLabel"]["value"]
-    if uri not in altLabels: 
+    if uri not in altLabels:
         body = {
                             "@id": uri,
                             "@type": [substanceType, "chembl:Substance"],
@@ -123,18 +93,64 @@ def binding_as_doc(node):
         return msg
 
 
-urlOpener = FancyURLopener()
-urlOpener.addheader("Accept", "application/sparql-results+json, applicaton/json;q=0.1")
+class Populater:
 
-def json_reader():
-    with urlOpener.open(SPARQL) as jsonFile:
-    #with open("substance.json", mode="rb") as jsonFile:
-        bindings = ijson.items(jsonFile, "results.bindings.item")
-        for binding in bindings:
-#            print(".", end="", sep="", flush=True)
-            n = binding_as_doc(binding)
-            if n is not None:
-                yield n
+    es_host = conf.get("elasticsearch", {}).get("host", "localhost")
+    es = Elasticsearch(host=es_host)
 
-bulk(es, json_reader())
-altLabels = {}
+    urlOpener = FancyURLopener()
+    urlOpener.addheader("Accept", "application/sparql-results+json, applicaton/json;q=0.1")
+
+    def __init__(self, index, doc_type):
+        self.index = index
+        self.doc_type = doc_type
+        self.conf = conf["indexes"][index][doc_type]
+        self.added = set()
+        # for stats
+        self.count = 0
+        self.start = time.time()
+        self.lastCheck = start
+
+    def sparql():
+        sparql = []
+        sparql.append(sparql_prefixes())
+        sparql.append("SELECT *")
+        sparql.append("WHERE {")
+        if "graph" in self.conf:
+            sparql.append(" GRAPH <%s>" % self.conf["graph"])
+
+        ## clever bit here
+
+        if "graph" in self.conf:
+            sparl.append(" }")
+        sparql.append("}")
+
+
+    def sparqlUrl(self):
+        return urljoin(conf["sparql"]["uri"],
+            "?" + urlencode(dict(query=self.sparql(),
+                                timeout=conf["sparql"].get("timeout_s", 300))))
+
+
+    def json_reader(self):
+        with self.urlOpener.open(SPARQL) as jsonFile:
+        #with open("substance.json", mode="rb") as jsonFile:
+            bindings = ijson.items(jsonFile, "results.bindings.item")
+            for binding in bindings:
+    #            print(".", end="", sep="", flush=True)
+                n = binding_as_doc(binding)
+                if n is not None:
+                    yield n
+
+
+for index in conf["indexes"]:
+    try:
+            es.indices.delete(index=index)
+    except:
+            pass
+
+
+
+
+#bulk(es, json_reader())
+#altLabels = {}
