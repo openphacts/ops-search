@@ -168,9 +168,17 @@ The RDF properties to index:
 Properties MUST be given as a qname using
 one of the defined [prefixes](#Prefixes).
 
-Any [common properties](#Common properties) are added to this list.
+Any [common properties](#Common properties) are inserted first at the top of
+this list.
 
-If a `type` was specified, then in the the generated query the properties are individually made `OPTIONAL`.
+Within the indexed JSON documents the property will be given with the local
+name of the property (e.g. `title` and `altLabel`), or with `prefix_localname`
+if an earlier property in the property list *of this index-type* has a
+conflicting name (e.g. `dc:title` `dct:title` would be indexed as `title` and
+`dct_title`).
 
-Within the indexed JSON documents the property will be given with the local name of the property (e.g. `title` and `altLabel`), or as in the configuration if an earlier property in the list has a conflicting name (e.g. `dc:title` `dct:title` would be indexed as `title` and `dct:title`).
+If a `type` was specified (match by type), then in the the generated query the
+properties are individually made `OPTIONAL`, if not, all the specified
+properties must be present in the graph (match by pattern).
+
 
