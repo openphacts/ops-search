@@ -58,7 +58,7 @@ class Indexer:
         self.start = time.time()
         self.lastCheck = self.start
 
-    def sparql_property(self, prop):
+    def variable_for_property(self, prop):
         short = prop.split(":")[-1]
         if short not in self.properties:
             name = short
@@ -67,6 +67,10 @@ class Indexer:
             ## FIXME: Any other illegal chars for SPARQL VARNAME?
             # http://www.w3.org/TR/sparql11-query/#rVARNAME
         self.properties[name] = prop
+        return name
+
+    def sparql_property(self, prop):
+        return "    ?uri %s ?%s ." % (prop, self.variable_for_property(prop))
 
     def sparql(self):
         sparql = []
@@ -80,14 +84,10 @@ class Indexer:
         if "type" in self.conf:
             sparql.append("   ?uri a %s ." % self.conf["type"])
             optionals = True
-        else:
-            sparql.append("   ?uri ")
-
         properties = []
 
         if "common_properties" in conf:
             properties.extend(conf["common_properties"])
-
         if "properties" in self.conf:
             properties.extend(self.conf["properties"])
 
