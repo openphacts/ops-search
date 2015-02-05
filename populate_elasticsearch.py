@@ -282,7 +282,7 @@ class Indexer:
             self.indexed.add(doc_uuid)
             self.cache[doc_uuid] = body
             msg["_source"] = body
-            print("Cache save")
+            #print("Cache save")
         else:
             # We'll need to update it. We are however part of a
             # bulk operation and can't request ElasticSearch for
@@ -295,9 +295,9 @@ class Indexer:
                 body = self.merge_bodies(cached, body)
                 msg["_source"] = body
                 self.cache[doc_uuid] = body
-                print("Cache hit")
+                #print("Cache hit")
             else:
-                print("Cache miss")
+                #print("Cache miss")
                 ## NOTE: We can't put body in self.cache as it is only partial
 
                 # We've forgotten about it.. Let's do the
