@@ -213,7 +213,9 @@ class Indexer:
 
     def merge_bodies(self, old, new):
         body = {}
-        for k in set(old.keys()  + new.keys()):
+        keys = set(old.keys())
+        keys.update(new.keys())
+        for k in keys:
             if k == "@id":
                 # we don't want a list for @id,
                 # and they should match
@@ -222,7 +224,7 @@ class Indexer:
             # We'll modify old_v in-place (create if it does not exists)
             old_v = old.get(k, [])
             new_v = new.get(k, set())
-            old_v.extend(set(new_v) - set(old_v)) # avoid duplicates
+            old_v.extend(list(set(new_v) - set(old_v))) # avoid duplicates
             body[k] = old_v
         return body
 
@@ -290,7 +292,7 @@ class Indexer:
             # can simply merge and put it a second time
             cached = self.cache.get(doc_uuid)
             if cached:
-                body = merge_bodies(cached, body)
+                body = self.merge_bodies(cached, body)
                 msg["_source"] = body
                 self.cache[doc_uuid] = body
                 print("Cache hit")
