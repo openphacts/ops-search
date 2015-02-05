@@ -235,10 +235,12 @@ class Indexer:
             #print(var, node[var])
 
             if node[var] is None or node[var].get("value") is None:
-                continue
-            value = node[var]["value"]
-            params[var] = value
-            body[var] = [ value ]
+                body[var] = []
+                params[var] = None
+            else:
+                value = node[var]["value"]
+                params[var] = value
+                body[var] = [ value ]
 
         doc_id = uri
 
