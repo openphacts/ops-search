@@ -97,7 +97,7 @@ class Indexer:
         return "    ?%s %s ?%s ." % (ID, prop, self.variable_for_property(prop))
 
     def sparql_optional(self, sparql):
-        return "     OPTIONAL { %s } " % sparql.strip()
+        return "    OPTIONAL { %s }" % sparql.strip()
 
     def sparql(self):
         sparql = []
@@ -110,8 +110,21 @@ class Indexer:
 
         optionals = False
         if "type" in self.conf:
-            sparql.append("   ?%s a %s ." % (ID, self.conf["type"]))
+            rdf_type = self.conf["type"]
+            sparql.append("   { ?%s a %s . }" % (ID, rdf_type))
             optionals = True
+
+            subclasses = self.conf.get("subclasses")
+            if subclasses:
+                sparql.append("   UNION {")
+                sparql.append("     ?%s a ?subClass . " % ID)
+                if subclasses == "owl":
+                    sparql.append("     ?subClass a owl:Class . ")
+                    sparql.append("     ?subClass rdfs:subClassOf+ %s ." % rdf_type)
+                else:
+                    sparql.append("     ?subClass rdfs:subClassOf %s ." % rdf_type)
+                sparql.append("   }")
+
         properties = []
 
         if "common_properties" in self.session.conf:
