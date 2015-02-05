@@ -250,12 +250,12 @@ class Indexer:
                 "_id": doc_id
                }
 
-#        doc_uuid = uuid.uuid5(uuid.NAMESPACE_URL, uri)
-#        if not doc_uuid in self.indexed:
-#            self.indexed.add(doc_uuid)
-#            msg["_source"] = body
-#        else:
-        msg.update({
+        doc_uuid = uuid.uuid5(uuid.NAMESPACE_URL, uri)
+        if not doc_uuid in self.indexed:
+            self.indexed.add(doc_uuid)
+            msg["_source"] = body
+        else:
+            msg.update({
                 "_op_type": "update",
                 "script": self.update_script_for(body),
                 "params": params,
