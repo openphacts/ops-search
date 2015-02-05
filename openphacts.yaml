@@ -93,7 +93,7 @@ indexes:
         - drugbank:swissprotName
     enzymes:
       graph: http://linkedlifedata.com/resource/drugbank
-      type: drugbank: enzymes
+      type: drugbank:enzymes
       properties:
         - drugbank:geneName
         - drugbank:name
