@@ -39,18 +39,17 @@ You can test this at: [http://localhost:9200/_search?q=alice](http://localhost:9
 
 ## Running
 
-After modifying the [configuration](#Configuration), simply run:
+To run using the [configuration](#Configuration) in `example.yaml`, do:
 
-    python3 populate_elasticsearch.py
+    python3 populate_elasticsearch.py example.yaml
 
-You can specify an alternative config file as an argument:
-
-    python3 populate_elasticsearch.py openphacts.yaml
 
 ## Configuration
 
-You need to modify [config.yaml](config.yaml) to configure the ElasticSearch data loading. The configuration 
-file is read from the current directory when running the script.
+You need to create a config file similar to 
+[example.yaml](example.yaml) to configure the ElasticSearch data loading. 
+
+A description of each element of the configuraton follows below:
 
 ### ElasticSearch
 
