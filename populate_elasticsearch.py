@@ -268,12 +268,17 @@ class Indexer:
         bulk(self.session.es, self.json_reader(), raise_on_error=True)
 
 def main(*args):
-    if not args:
-        args = ["config.yaml"]
+    if not args or args[1] in ("-h", "--help"):
+        print("Usage: %s [config]" % sys.argv[0])
+        print("")
+        print("See example.yaml for an example configuraton file")
+        print("and README.md for details.")
+        return 0
     session = Session(args[0])
     session.run()
 
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    exit = main(*sys.argv[1:])
+    sys.exit(exit)
