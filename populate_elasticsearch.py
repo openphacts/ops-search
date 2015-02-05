@@ -314,7 +314,7 @@ class Indexer:
         bulk(self.session.es, self.json_reader(), raise_on_error=True)
 
 def main(*args):
-    if not args or args[1] in ("-h", "--help"):
+    if not args or args[0] in ("-h", "--help"):
         print("Usage: %s [config]" % sys.argv[0])
         print("")
         print("See example.yaml for an example configuraton file")
