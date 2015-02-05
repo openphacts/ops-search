@@ -3,6 +3,7 @@ import sys
 import time
 import json
 import uuid
+import collections
 from urllib.request import FancyURLopener
 from urllib.parse import urljoin, quote, urlencode, unquote
 
@@ -26,6 +27,14 @@ ID="id"
 # and for the rdf:type (on subclasses)
 TYPE="type"
 
+class SlidingWindowDictionary(collections.OrderedDict):
+    def __init__(self, max_size=1000):
+        self.max_size = max_size
+        super().__init__()
+    def __setitem__(self, key, value):
+        while (len(self) >= self.max_size):
+            self.popitem(last=False)
+        super().__setitem__(key, value)
 
 class Session:
     def __init__(self, config_file):
@@ -68,6 +77,7 @@ class Session:
 
 class Indexer:
     def __init__(self, session, index, doc_type):
+        self.cache = SlidingWindowDictionary()
         self.session = session
         self.index = index
         self.doc_type = doc_type
