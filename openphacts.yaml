@@ -50,3 +50,50 @@ indexes:
           - skos:altLabel
           - dct:description
           - chembl:organismName
+  ocrs:
+    compound:
+      graph: http://ops.rsc.org/
+      properties:
+        - cheminf:CHEMINF_000476
+        - cheminf:CHEMINF_000465
+        - cheminf:CHEMINF_000466
+        - cheminf:CHEMINF_000490
+  uniprot:
+    target:
+      graph: http://purl.uniprot.org/
+      properties:
+        - uniprot:mnemonic
+        - uniprot:oldMnemonic
+        # TODO: support for property paths
+        #- uniprot:recommendedName/uniprot:fullName
+        #- uniprot:recommendedName/uniprot:shortName
+        #- uniprot:recommendedName/uniprot:ecName
+        #- uniprot:alternativeName/uniprot:fullName
+        #- uniprot:alternativeName/uniprot:shortName
+        #- uniprot:alternativeName/uniprot:ecName
+        #- uniprot:alternativeName/uniprot:internationalNonpropriatoryName
+        #- uniprot:alternativeName/uniprot:cdAntigenName
+        #- uniprot:alternativeName/uniprot:allergenName
+  drugbank:
+    compound:
+      graph: http://linkedlifedata.com/resource/drugbank
+      type: drugbank:drugs
+      properties:
+        - drugbank:brandName
+        - drugbank:genericName
+        - drugbank:chemicalIupacName
+        - drugbank:synonym
+        - drugbank:swissprotName
+    target:
+      graph: http://linkedlifedata.com/resource/drugbank
+      type: drugbank:targets
+      properties:
+        - drugbank:geneName
+        - drugbank:synonym
+        - drugbank:swissprotName
+    enzymes:
+      graph: http://linkedlifedata.com/resource/drugbank
+      type: drugbank: enzymes
+      properties:
+        - drugbank:geneName
+        - drugbank:name
