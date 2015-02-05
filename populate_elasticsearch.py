@@ -18,15 +18,8 @@ except ex:
     print("Can't find py-yajl, JSON parsing will be slower")
     import ijson
 
-from lru import LRUCacheDict
-
 REPORT_EVERY=1200
 DEFAULT_SPARQL_TIMEOUT=60
-
-# Cache for keeping indexed JSON documents in memory in case
-# we need to update them later
-CACHE=1000
-CACHE_TIMEOUT=3 # seconds
 
 # SPARQL variable name for the resource
 ID="id"
@@ -83,7 +76,6 @@ class Indexer:
         self.reset_stats()
         self.properties = {}
         self.blanknodes = {}
-        self.cache = LRUCacheDict(max_size=CACHE, expiration=CACHE_TIMEOUT)
 
     def reset_stats(self):
         self.count = 0
@@ -209,21 +201,6 @@ class Indexer:
 
         return "\n".join(script)
 
-    def merge_bodies(self, old, new):
-        body = {}
-        for k in set(old.keys()  + new.keys()):
-            if k == "@id":
-                # we don't want a list for @id,
-                # and they should match
-                body[k] = old[k]
-                continue
-            # We'll modify old_v in-place (create if it does not exists)
-            old_v = old.get(k, [])
-            new_v = new.get(k, set())
-            old_v.extend(set(new_v) - set(old_v)) # avoid duplicates
-            body[k] = old_v
-        return body
-
     def binding_as_doc(self, node):
         self.count += 1
         if (self.count % REPORT_EVERY == 0):
@@ -276,36 +253,15 @@ class Indexer:
         doc_uuid = uuid.uuid5(uuid.NAMESPACE_URL, uri)
         if not doc_uuid in self.indexed:
             self.indexed.add(doc_uuid)
-            self.cache[doc_uuid] = body
             msg["_source"] = body
-            print("Cache save")
         else:
-            # We'll need to update it. We are however part of a
-            # bulk operation and can't request ElasticSearch for
-            # the old document.
-
-            # Let's hope we still have it in memory, and we
-            # can simply merge and put it a second time
-            cached = self.cache.get(doc_uuid)
-            if cached:
-                body = merge_bodies(cached, body)
-                msg["_source"] = body
-                self.cache[doc_uuid] = body
-                print("Cache hit")
-            else:
-                print("Cache miss")
-                ## NOTE: We can't put body in self.cache as it is only partial
-
-                # We've forgotten about it.. Let's do the
-                # update server-side (slower)
-                msg.update({
-                    "_op_type": "update",
-                    "script": self.update_script_for(body),
-                    "params": params,
-                    "upsert": body
-                })
-            # TODO: Investigate alternative data structures (child documents?)
-            # to avoid update logic
+            msg.update({
+                "_op_type": "update",
+                "script": self.update_script_for(body),
+                "params": params,
+                "upsert": body
+            })
+            # Or child documents?
         return msg
 
     def load(self):

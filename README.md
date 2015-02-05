@@ -20,7 +20,6 @@ The additional Python libraries used are:
 * [PyYaml](https://pypi.python.org/pypi/pyaml/) ([WTFPL license](https://github.com/mk-fg/pretty-yaml/blob/master/COPYING))
 * [ijson](https://pypi.python.org/pypi/ijson/) ([BSD license](https://github.com/isagalaev/ijson/blob/master/LICENSE.txt))
 * [yajl](https://pypi.python.org/pypi/yajl) (optional) ([BSD license?](https://github.com/rtyler/py-yajl/issues/28))
-* [pylru](https://pypi.python.org/pypi/py_lru_cache/) (dual: [BSD license](https://github.com/stucchio/Python-LRU-cache/blob/master/LICENSE) and GPL 3).
 
 
 ## Installation
@@ -30,7 +29,7 @@ You will need Python 3 and pip, in addition to some dependencies.
 In Ubuntu 14.04, this easiest achieved using:
 
     sudo apt-get install git python3-pip libyajl2 python3-yaml 
-    sudo pip3 install elasticsearch ijson yajl py_lru_cache
+    sudo pip3 install elasticsearch ijson yajl
 
 You will also need an [ElasticSearch](http://www.elasticsearch.org) installation. You can test it out with [Docker](https://www.docker.com/):
 
