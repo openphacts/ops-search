@@ -84,11 +84,15 @@ class Session:
         prefix,rest = p.split(":", 1)
         if not prefix in self.conf.get("prefixes", {}):
             raise Exception("Unknown prefix: " + prefix)
-        uri = urlparse(self.conf.get("prefixes")[prefix] + rest)
+        base = self.conf.get("prefixes")[prefix]
+        urlparse(base + rest)
 
     def check_prefixes(self):
         for uri in self.conf.get("prefixes", {}).values():
-            urlparse(uri)
+            if not (uri.endswith("#") or uri.endswith("/")):
+                # This should catch prefix definitions not ending with / #
+                print("WARNING: Prefix doesn't end with / or #: %s" % uri,
+                    file=sys.stderr)
         for p in self.conf.get("common_properties", []):
             self.check_property(p)
         for index,index_conf in self.conf["indexes"].items():
