@@ -31,8 +31,7 @@ indexes:
           - foaf:givenName
           - foaf:surname
           - dc:description
-          -
-            sparql: "dbprop:shortDescription"
+          - sparql: "dbprop:shortDescription"
             variable: "shortDesc"
             jsonld: "dc:description"
           - dbprop:dateOfBirth
