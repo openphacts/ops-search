@@ -12,9 +12,9 @@ prefixes:
   dc: http://purl.org/dc/elements/1.1/
   skos: http://www.w3.org/2004/02/skos/core#
   chembl: http://rdf.ebi.ac.uk/terms/chembl#
-#  cheminf: http://example.com/FIXME#
-#  uniprot: http://example.com/FIXME#
-#  drugbank: http://example.com/FIXME#
+  cheminf: http://www.semanticweb.org/ontologies/cheminf.owl#
+  uniprot: http://purl.uniprot.org/core/
+  drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank
 
 
 sparql:
