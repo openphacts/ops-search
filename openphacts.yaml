@@ -14,7 +14,7 @@ prefixes:
   chembl: http://rdf.ebi.ac.uk/terms/chembl#
   cheminf: http://www.semanticweb.org/ontologies/cheminf.owl#
   uniprot: http://purl.uniprot.org/core/
-  drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank
+  drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/
 
 
 sparql:
