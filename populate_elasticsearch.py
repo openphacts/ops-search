@@ -5,7 +5,7 @@ import json
 import uuid
 import collections
 from urllib.request import FancyURLopener
-from urllib.parse import urljoin, quote, urlencode, unquote
+from urllib.parse import urljoin, quote, urlencode, unquote, urlparse
 
 import yaml
 
@@ -74,6 +74,28 @@ class Session:
                 indexer = Indexer(self, index, doc_type)
                 ## TODO: Store mapping for JSON-LD
                 indexer.load()
+
+    def check(self):
+        self.check_prefixes()
+
+    def check_property(self, p):
+        if not ":" in p:
+            raise Exception("Invalid property, no prefix: " + p)
+        prefix,rest = p.split(":", 1)
+        if not prefix in self.conf.get("prefixes", {}):
+            raise Exception("Unknown prefix: " + prefix)
+        uri = urlparse(self.conf.get("prefixes")[prefix] + rest)
+
+    def check_prefixes(self):
+        for uri in self.conf.get("prefixes", {}).values():
+            urlparse(uri)
+        for p in self.conf.get("common_properties", []):
+            self.check_property(p)
+        for index,index_conf in self.conf["indexes"].items():
+            for doc_type,type_conf in index_conf.items():
+                for p in type_conf.get("properties", []):
+                    self.check_property(p)
+
 
 class Indexer:
     def __init__(self, session, index, doc_type):
@@ -325,6 +347,7 @@ def main(*args):
         print("and README.md for details.")
         return 0
     session = Session(args[0])
+    session.check()
     session.run()
 
 
