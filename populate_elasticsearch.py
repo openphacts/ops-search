@@ -78,15 +78,18 @@ class Session:
     def check(self):
         self.check_prefixes()
 
+    def expand_qname(self, p):
+        if not ":" in p:
+            raise Exception("Invalid property, no prefix: " + p)
+        prefix,rest = p.split(":", 1)
+        if not prefix in self.conf.get("prefixes", {}):
+            raise Exception("Unknown prefix: " + prefix)
+        base = self.conf.get("prefixes")[prefix]
+        return base + rest
+
     def check_property(self, p):
         if type(p) == str:
-            if not ":" in p:
-                raise Exception("Invalid property, no prefix: " + p)
-            prefix,rest = p.split(":", 1)
-            if not prefix in self.conf.get("prefixes", {}):
-                raise Exception("Unknown prefix: " + prefix)
-            base = self.conf.get("prefixes")[prefix]
-            urlparse(base + rest)
+            urlparse(self.expand_qname(p))
         else:
             ## Assume it is dict-based - check they are all non-empty
             if not p.get("sparql"):
@@ -127,22 +130,34 @@ class Indexer:
         self.start = time.time()
         self.lastCheck = self.start
 
-    def variable_for_property(self, prop):
+    def variable_for_property_name(self, prop):
         short = prop.split(":")[-1]
         if short not in self.properties:
-            name = short
-        else:
-            name = prop.replace(":", "_")
-            ## FIXME: Any other illegal chars for SPARQL VARNAME?
-            # http://www.w3.org/TR/sparql11-query/#rVARNAME
-        self.properties[name] = prop
-        return name
+            return short
+        u = uuid.uuid5(uuid.NAMESPACE_URL, self.expand_qname(prop))
+        print("WARNING: non-unique short-name for %s, falling back to %s" % (prop, u),
+            file=sys.stderr)
+        return u
 
     def sparql_property(self, prop):
-        return "    ?%s %s ?%s ." % (ID, prop, self.variable_for_property(prop))
+        return "    ?%s %s ?%s ." % (ID, prop["sparql"], prop["variable"])
 
     def sparql_optional(self, sparql):
         return "    OPTIONAL { %s }" % sparql.strip()
+
+    def expand_property(self, p):
+        if type(p) == str:
+            variable = self.variable_for_property_name(p)
+            p = {
+                    "sparql": p,
+                    "variable": variable,
+                    "jsonld": variable
+                }
+        name = p["variable"]
+        if name in self.properties:
+            raise Exception("Duplicate property name " + name)
+        self.properties[name] = p
+        return p
 
     def sparql(self):
         sparql = []
@@ -171,11 +186,8 @@ class Indexer:
                 sparql.append("   }")
 
         properties = []
-
-        if "common_properties" in self.session.conf:
-            properties.extend(self.session.conf["common_properties"])
-        if "properties" in self.conf:
-            properties.extend(self.conf["properties"])
+        properties.extend(map(self.expand_property, self.session.conf.get("common_properties", [])))
+        properties.extend(map(self.expand_property, self.conf.get("properties", [])))
 
         if not properties:
             raise Exception("No properties configured for %s %s" % (self.index, self.doc_type))
@@ -237,11 +249,15 @@ class Indexer:
         for var in body:
             if var.startswith("@"):
                 continue
-            script.append("if (! ctx._source.containsKey('%s')) {" % var)
-            script.append("  ctx._source.%s = [%s] " % (var,var))
+
+            prop = self.properties[var]
+            jsonld = prop["jsonld"]
+
+            script.append("if (! ctx._source.containsKey('%s')) {" % jsonld)
+            script.append("  ctx._source['%s'] = [%s] " % (jsonld,var))
             script.append("} else ")
-            script.append("if (! ctx._source['%s'].contains(%s)) {" % (var,var))
-            script.append("  ctx._source['%s'] += %s" % (var,var))
+            script.append("if (! ctx._source['%s'].contains(%s)) {" % (jsonld,var))
+            script.append("  ctx._source['%s'] += %s" % (jsonld,var))
             script.append("}")
 
         return "\n".join(script)
@@ -265,6 +281,7 @@ class Indexer:
 
     def binding_as_doc(self, node):
         self.count += 1
+        # Time for some statistics!
         if (self.count % REPORT_EVERY == 0):
             now = time.time()
             speed = REPORT_EVERY/(now-self.lastCheck)
@@ -296,13 +313,16 @@ class Indexer:
                 continue
             #print(var, node[var])
 
+            prop = self.properties[var]
+            jsonld = prop["jsonld"]
+
             if node[var] is None or node[var].get("value") is None:
-                body[var] = []
                 params[var] = None
+                body[jsonld] = []
             else:
                 value = node[var]["value"]
                 params[var] = value
-                body[var] = [ value ]
+                body[jsonld] = [ value ]
 
         doc_id = uri
 
