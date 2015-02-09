@@ -79,13 +79,22 @@ class Session:
         self.check_prefixes()
 
     def check_property(self, p):
-        if not ":" in p:
-            raise Exception("Invalid property, no prefix: " + p)
-        prefix,rest = p.split(":", 1)
-        if not prefix in self.conf.get("prefixes", {}):
-            raise Exception("Unknown prefix: " + prefix)
-        base = self.conf.get("prefixes")[prefix]
-        urlparse(base + rest)
+        if type(p) == str:
+            if not ":" in p:
+                raise Exception("Invalid property, no prefix: " + p)
+            prefix,rest = p.split(":", 1)
+            if not prefix in self.conf.get("prefixes", {}):
+                raise Exception("Unknown prefix: " + prefix)
+            base = self.conf.get("prefixes")[prefix]
+            urlparse(base + rest)
+        else:
+            ## Assume it is dict-based - check they are all non-empty
+            if not p.get("sparql"):
+                raise Exception("'sparql' missing for %s" % p)
+            if not p.get("variable"):
+                raise Exception("'variable' missing for %s" % p)
+            if not p.get("jsonld"):
+                raise Exception("'jsonld' missing for %s" % p)
 
     def check_prefixes(self):
         for uri in self.conf.get("prefixes", {}).values():
