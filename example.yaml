@@ -30,7 +30,11 @@ indexes:
           - foaf:givenName
           - foaf:surname
           - dc:description
-          - dbprop:shortDescription
+          - {
+              sparql: "dbprop:shortDescription"
+              variable: "shortDesc"
+              jsonld: "dc:description"
+            }
           - dbprop:dateOfBirth
     athlete:
         type: dbpedia:Athlete
