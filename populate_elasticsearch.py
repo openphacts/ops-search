@@ -134,7 +134,7 @@ class Indexer:
         short = prop.split(":")[-1]
         if short not in self.properties:
             return short
-        u = uuid.uuid5(uuid.NAMESPACE_URL, self.expand_qname(prop))
+        u = uuid.uuid5(uuid.NAMESPACE_URL, self.session.expand_qname(prop))
         print("WARNING: non-unique short-name for %s, falling back to %s" % (prop, u),
             file=sys.stderr)
         return u
@@ -312,9 +312,12 @@ class Indexer:
             if var in (ID,TYPE):
                 continue
             #print(var, node[var])
-
-            prop = self.properties[var]
-            jsonld = prop["jsonld"]
+            if var == "subClass":
+                prop = "subClassOf"
+                jsonld = "rdfs:subClassOf"
+            else:
+                prop = self.properties[var]
+                jsonld = prop["jsonld"]
 
             if node[var] is None or node[var].get("value") is None:
                 params[var] = None

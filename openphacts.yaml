@@ -27,7 +27,7 @@ common_properties:
   - rdfs:label
 
 indexes:
-  chembl:
+  chembl19:
     substance:
         graph: http://www.ebi.ac.uk/chembl
         type: chembl:Substance
@@ -52,7 +52,9 @@ indexes:
           - dct:title
           - skos:altLabel
           - dct:description
-          - chembl:organismName
+          - sparql: chembl:organismName
+            variable: organism
+            jsonld: organism
   ocrs:
     compound:
       graph: http://ops.rsc.org/
@@ -67,16 +69,34 @@ indexes:
       properties:
         - uniprot:mnemonic
         - uniprot:oldMnemonic
-        # TODO: support for property paths
-        #- uniprot:recommendedName/uniprot:fullName
-        #- uniprot:recommendedName/uniprot:shortName
-        #- uniprot:recommendedName/uniprot:ecName
-        #- uniprot:alternativeName/uniprot:fullName
-        #- uniprot:alternativeName/uniprot:shortName
-        #- uniprot:alternativeName/uniprot:ecName
-        #- uniprot:alternativeName/uniprot:internationalNonpropriatoryName
-        #- uniprot:alternativeName/uniprot:cdAntigenName
-        #- uniprot:alternativeName/uniprot:allergenName
+      # FIXME: how would jsonld names get into the @context?
+        - sparql: uniprot:recommendedName/uniprot:fullName
+          variable: fullName
+          jsonld: fullName
+        - sparql: uniprot:recommendedName/uniprot:shortName
+          variable: shortName
+          jsonld: shortName
+        - sparql: uniprot:recommendedName/uniprot:ecName
+          variable: ecName
+          jsonld: ecName
+        - sparql: uniprot:alternativeName/uniprot:fullName
+          variable: altFullName
+          jsonld: altFullName
+        - sparql: uniprot:alternativeName/uniprot:shortName
+          variable: altShortName
+          jsonld: altShortName
+        - sparql: uniprot:alternativeName/uniprot:ecName
+          variable: altEcName
+          jsonld: altEcName
+        - sparql: uniprot:alternativeName/uniprot:internationalNonpropriatoryName
+          variable: internationalNonpropriatoryName
+          jsonld: internationalNonpropriatoryName
+        - sparql: uniprot:alternativeName/uniprot:cdAntigenName
+          variable: antigen
+          jsonld: antigen
+        - sparql: uniprot:alternativeName/uniprot:allergenName
+          variable: allergen
+          jsonld: allergen
   drugbank:
     compound:
       graph: http://linkedlifedata.com/resource/drugbank
@@ -94,7 +114,7 @@ indexes:
         - drugbank:geneName
         - drugbank:synonym
         - drugbank:swissprotName
-    enzymes:
+    enzyme:
       graph: http://linkedlifedata.com/resource/drugbank
       type: drugbank:enzymes
       properties:
