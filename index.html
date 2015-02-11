@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ops.s11.no</title>
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.css" rel="stylesheet" type="text/css" />
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.css" rel="stylesheet" type="text/css" />
+<style type="text/css">
+  .score {
+    color: gray;
+  }
+  .desc { 
+    background: #eee;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>ops.s11.no</h1>
+
+<hr />
+<address>
+<p>
+This site hosts the (early) development version of
+<a href="https://wiki.openphacts.org/index.php/IRS_2">IRS 2</a> for
+the <a href="http://www.openphacts.org/">Open PHACTS</a> project.
+</p>
+</address>
+
+<div class="jumbotron">
+
+<form action="search" role="form" id="search">
+  <p>
+	  <label for="q">Compound/target:</label>
+	  <input placeholder="histamine organism:taurus" autofocus="autofocus" class="formcontrol" name="q" id="q" size="30" autocomplete="off" />
+  </p>
+  <p>
+    <input type="submit" value="Search" class="btn btn-primary btn-lg" />
+  </p>
+</form>
+</div>
+
+<div id="results">
+  <div id="stats"></div>
+<ul id="resultlist">
+</ul>
+</div>
+
+<div id="tmpresults">
+  <div id="tmpstats"></div>
+<ul id="tmpresultlist">
+</ul>
+</div>
+
+
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js" type="text/javascript"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.js" type="text/javascript"></script>
+<script src="//medialize.github.io/URI.js/src/URI.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+function explorer_uri(hit) {
+  if (hit._type == "substance") { 
+      return "http://explorer2.openphacts.org/compounds?uri=" + hit._id;
+  } else {
+      return "http://explorer2.openphacts.org/targets?uri=" + hit._id;
+  }
+}
+
+// based on http://stackoverflow.com/a/9229821/412540
+// by Georg Barikin
+function uniq(a) {
+  var seen = {};
+  return a.filter(function(item) {
+      key = item.toLowerCase();
+      return seen.hasOwnProperty(key) ? false : (seen[key] = true);
+  });
+}
+
+function merge_lists(lists) {
+  var list = []
+  lists.forEach(function(l) { 
+      if ($.isArray(l)) {
+        $.merge(list, l);
+      }
+    });
+  return list
+}
+
+function render_desc(d) {
+  return " <span class='desc'>" + d + "</span>";
+}
+
+function render_hit(hit, inc_score) {
+   doc = hit._source;
+   names = merge_lists([doc.prefLabel, doc.title, doc.label, hit._id]);
+   name = names[0]; // fallback: URI from hit._id
+
+   if (hit.hasOwnProperty("highlight")) {
+     // Only show highlighted fields
+      h = hit.highlight;
+      descs = uniq(merge_lists([h.prefLabel, h.title, h.label, h.description, h.altLabel ]));
+    } else {
+      descs = uniq(merge_lists([name], [doc.prefLabel, doc.title, doc.label, doc.description, doc.altLabel ])).slice(1);;
+    }
+   html = "<li><a href='" + explorer_uri(hit) + "'>" + name + "</a> <small>" + 
+       descs.map(render_desc) + "</small> " +
+			"<em>"+(doc.organism || "") + "</em> ";
+ if(inc_score) {
+  html = html + "<span class='score'>" + hit._score + "</span>" ; 
+ }
+ html = html + " <small>&lt;<a href='" + hit._id + "'>" + 
+     hit._id + "</a>&gt;</small> " + "</li>";
+ return html;
+}
+
+function search(query) {
+
+  $("#resultlist").empty();
+  $("#stats").empty();
+
+  var search = { 
+                query: { 
+                    match: { 
+                      _all: { 
+                        query: query,
+                        operator: "AND"
+                      }
+                    }
+                },
+                highlight: {
+                  "pre_tags" : ["<strong>"],
+                  "post_tags" : ["</strong>"],
+
+                  fields: { 
+                    title: {},
+                    prefLabel: {},
+                    altLabel: {},
+                    label: {},
+                    description: {}
+                  }
+                }
+              };
+
+// TODO: Use http://www.elasticsearch.org/blog/client-for-node-js-and-the-browser/ instad
+
+//$.getJSON('search?default_operator=AND&q=' + ( $("#q").val() || "histamine"), function(data) {
+  var ajax = { type: "POST",
+               url: "search",
+               data: JSON.stringify(search),
+               contentType: "application/json",
+               dataType: "json",
+               success: function(data) {
+                  $("#resultlist").empty();
+                  $("#stats").empty();
+                          $("#stats").append(data.hits.total + " hits for " + $("#q").val());
+                          $.each(data.hits.hits, function(i,hit){
+                            $("#resultlist").append(render_hit(hit, true));
+                              
+                        });
+                      }
+  };
+  $.ajax(ajax);
+	$("#tmpresults").hide();
+	$("#results").show();
+}
+
+$( "#search" ).submit(function(event) {
+  var query = $("#q").val() || "histamine";
+  history.pushState({}, "Search for: "+ query, "?q=" + query);
+  search(query);
+	event.preventDefault();
+});
+
+$("#q").on("input", function () {
+  $("#results").hide();
+  $("#tmpresults").show();
+  $("#tmpresultlist").empty();
+  $("#tmpstats").empty();
+  var search=$("#q").val() + "*";
+
+  $.getJSON('search?default_operator=AND&q=' + search, function(data) {
+    $("#tmpresultlist").empty();
+    $("#tmpstats").empty();
+
+    $("#tmpstats").append(data.hits.total + " hits for " + search);
+
+    $.each(data.hits.hits, function(i,hit){
+      $("#tmpresultlist").append(render_hit(hit, false));
+    });
+  });
+}) //.change();
+
+function check_query() {
+    $("#tmpresults").hide();
+    $("#results").hide();
+    var uri = new URI();
+    if (uri.hasQuery("q")) {
+      var q = uri.query(true).q;
+      $("#q").val(uri.query(true).q);
+      search(q);    
+    }
+}
+
+// check on page load
+$(check_query);
+// ... and while navigating
+$(window).on("navigate", function (event, data) {
+    // but this doesn't work :(
+    check_query();
+});
+
+</script>
+
+</body>
+</html>
