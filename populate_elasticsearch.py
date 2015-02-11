@@ -279,16 +279,18 @@ class Indexer:
             body[k] = old_v
         return body
 
+    def print_statistics(self):
+        now = time.time()
+        speed = REPORT_EVERY/(now-self.lastCheck)
+        avgSpeed = self.count/(now-self.start)
+        print("n=%s, speed=%0.1f/sec, avgSpeed=%0.1f/sec" % (self.count, speed, avgSpeed))
+        self.lastCheck = now
+
     def binding_as_doc(self, node):
         self.count += 1
         # Time for some statistics!
         if (self.count % REPORT_EVERY == 0):
-            now = time.time()
-            speed = REPORT_EVERY/(now-self.lastCheck)
-            avgSpeed = self.count/(now-self.start)
-            print("n=%s, speed=%0.1f/sec, avgSpeed=%0.1f/sec" % (self.count, speed, avgSpeed))
-            self.lastCheck = now
-
+            self.print_statistics()
 
         if node[ID]["type"] == "uri":
             uri = self.unescape(node[ID])
@@ -374,6 +376,8 @@ class Indexer:
         print("Index %s type %s" % (self.index, self.doc_type))
         self.reset_stats()
         bulk(self.session.es, self.json_reader(), raise_on_error=True)
+        # final statistics
+        self.print_statistics()
 
 def main(*args):
     if not args or args[0] in ("-h", "--help"):
