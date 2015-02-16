@@ -12,7 +12,7 @@ prefixes:
   dc: http://purl.org/dc/elements/1.1/
   skos: http://www.w3.org/2004/02/skos/core#
   chembl: http://rdf.ebi.ac.uk/terms/chembl#
-  cheminfo: http://semanticscience.org/resource/
+  cheminf: http://semanticscience.org/resource/
   uniprot: http://purl.uniprot.org/core/
   drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/
 
