@@ -113,6 +113,9 @@ class Session:
                     self.check_property(p)
 
 
+def negate(f):
+    return lambda *args,**kwargs: not f(*args, **kwargs) 
+
 class Indexer:
     def __init__(self, session, index, doc_type):
         self.cache = SlidingWindowDictionary()
@@ -124,6 +127,10 @@ class Indexer:
         self.reset_stats()
         self.properties = {}
         self.blanknodes = {}
+
+    def sort_properties(self, properties):
+        properties.sort(key=negate(self.is_property_required))
+        return properties
 
     def reset_stats(self):
         self.count = 0
@@ -139,11 +146,13 @@ class Indexer:
             file=sys.stderr)
         return u
 
+    def is_property_required(self, prop):
+        return bool(prop.get("required", False))
+
     def sparql_property(self, prop):
         sparql = "    ?%s %s ?%s ." % (ID, prop["sparql"], prop["variable"])
-        required = bool(prop.get("required", False))
-        if not required:
-            return sparql_optional(sparql)
+        if not self.is_property_required(prop):
+            return self.sparql_optional(sparql)
         return sparql
 
     def sparql_optional(self, sparql):
@@ -193,6 +202,7 @@ class Indexer:
 
         if not properties:
             raise Exception("No properties configured for %s %s" % (self.index, self.doc_type))
+        self.sort_properties(properties)
 
         #print("Properties:\n  ", " ".join(properties))
         props_sparql = map(self.sparql_property, properties)
