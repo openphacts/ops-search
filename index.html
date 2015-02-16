@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">     
+<meta name="viewport" content="width=device-width, initial-scale=1">      
 
 <title>ops.s11.no</title>
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.css" rel="stylesheet" type="text/css" />
@@ -125,11 +125,9 @@ function search(query) {
 
   var search = { 
                 query: { 
-                    match: { 
-                      _all: { 
-                        query: query,
-                        operator: "AND"
-                      }
+                  query_string: { 
+                      query: query,
+                      default_operator: "AND"
                     }
                 },
                 highlight: {
