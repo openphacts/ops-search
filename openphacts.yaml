@@ -33,8 +33,11 @@ indexes:
         type: chembl:Substance
         subclasses: owl
         properties:
+          - chembl:chemblId
           - dct:title
-          - dc:title
+          - sparql: dc:title
+            variable: dctitle
+            jsonld: title
           - rdfs:description
           - skos:prefLabel
           - skos:altLabel
@@ -44,11 +47,16 @@ indexes:
         subclasses: owl
         properties:
           - dct:title
+          - chembl:chemblId
+          - sparql: chembl:organismName
+            variable: organism
+            jsonld: organism
 
     targetComponent:
         graph: http://www.ebi.ac.uk/chembl
         type: chembl:TargetComponent
         properties:
+          - chembl:chemblId
           - dct:title
           - skos:altLabel
           - dct:description
