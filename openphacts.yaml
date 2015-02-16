@@ -28,7 +28,7 @@ common_properties:
 
 indexes:
   chembl:
-    substance:
+    compound:
         graph: http://www.ebi.ac.uk/chembl
         type: chembl:Substance
         subclasses: owl
