@@ -161,7 +161,7 @@ function search(query) {
                success: function(data) {
                   $("#resultlist").empty();
                   $("#stats").empty();
-                  $("#stats").append(data.hits.total + " hits for <kbd>" + $("#q").val() + "</kbd>");
+                  $("#stats").append(data.hits.total + " hits for <kbd>" + query + "</kbd>");
                           $.each(data.hits.hits, function(i,hit){
                             $("#resultlist").append(render_hit(hit, true));
                               
