@@ -27,7 +27,7 @@ common_properties:
   - rdfs:label
 
 indexes:
-  chembl19:
+  chembl:
     substance:
         graph: http://www.ebi.ac.uk/chembl
         type: chembl:Substance
