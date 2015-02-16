@@ -140,7 +140,11 @@ class Indexer:
         return u
 
     def sparql_property(self, prop):
-        return "    ?%s %s ?%s ." % (ID, prop["sparql"], prop["variable"])
+        sparql = "    ?%s %s ?%s ." % (ID, prop["sparql"], prop["variable"])
+        required = bool(prop.get("required", False))
+        if not required:
+            return sparql_optional(sparql)
+        return sparql
 
     def sparql_optional(self, sparql):
         return "    OPTIONAL { %s }" % sparql.strip()
@@ -168,11 +172,9 @@ class Indexer:
         if "graph" in self.conf:
             sparql.append(" GRAPH <%s> {" % self.conf["graph"])
 
-        optionals = False
         if "type" in self.conf:
             rdf_type = self.conf["type"]
             sparql.append("   { ?%s a %s . }" % (ID, rdf_type))
-            optionals = True
 
             subclasses = self.conf.get("subclasses")
             if subclasses:
@@ -194,8 +196,6 @@ class Indexer:
 
         #print("Properties:\n  ", " ".join(properties))
         props_sparql = map(self.sparql_property, properties)
-        if optionals:
-            props_sparql = map(self.sparql_optional, props_sparql)
         sparql.extend(props_sparql)
 
 
