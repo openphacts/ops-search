@@ -120,3 +120,15 @@ indexes:
       properties:
         - drugbank:geneName
         - drugbank:name
+
+## what about these?
+# graph: http://rdf.imim.es
+# graph: http://linkedct.org
+# graph: http://aers.data2semantics.org/
+# graph: http://www.nextprot.org
+# graph: http://www.ebi.ac.uk/chebi
+# graph: http://www.geneontology.org
+# graph: http://purl.uniprot.org/enzyme
+# graph: http://www.openphacts.org/api/datasetDescriptors
+# graph: http://www.geneontology.org/terms
+# graph: http://www.wikipathways.org#
