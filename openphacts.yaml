@@ -62,19 +62,16 @@ indexes:
         - sparql: cheminf:CHEMINF_000476
           variable: title
           jsonld: title
-          optional: false
+          required: true
         - sparql: cheminf:CHEMINF_000465
           variable: validatedSynonym
           jsonld: validatedSynonym
-          optional: true
         - sparql: cheminf:CHEMINF_000466
           variable: unvalidatedSynonym
           jsonld: unvalidatedSynonym
-          optional: true
         - sparql: cheminf:CHEMINF_000490
           variable: molecularFormula
           jsonld: molecularFormula
-          optional: true
   uniprot:
     target:
       graph: http://purl.uniprot.org
