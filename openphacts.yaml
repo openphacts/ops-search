@@ -57,7 +57,7 @@ indexes:
             jsonld: organism
   ocrs:
     compound:
-      graph: http://ops.rsc.org/
+      graph: http://ops.rsc.org
       properties:
         - cheminf:CHEMINF_000476
         - cheminf:CHEMINF_000465
@@ -65,7 +65,7 @@ indexes:
         - cheminf:CHEMINF_000490
   uniprot:
     target:
-      graph: http://purl.uniprot.org/
+      graph: http://purl.uniprot.org
       properties:
         - uniprot:mnemonic
         - uniprot:oldMnemonic
