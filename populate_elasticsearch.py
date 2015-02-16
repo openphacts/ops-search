@@ -134,7 +134,7 @@ class Indexer:
         short = prop.split(":")[-1]
         if short not in self.properties:
             return short
-        u = uuid.uuid5(uuid.NAMESPACE_URL, self.session.expand_qname(prop))
+        u = str(uuid.uuid5(uuid.NAMESPACE_URL, self.session.expand_qname(prop))).replace("-", "")
         print("WARNING: non-unique short-name for %s, falling back to %s" % (prop, u),
             file=sys.stderr)
         return u
