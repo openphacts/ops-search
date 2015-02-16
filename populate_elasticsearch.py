@@ -36,6 +36,12 @@ class SlidingWindowDictionary(collections.OrderedDict):
             self.popitem(last=False)
         super().__setitem__(key, value)
 
+def negate(f):
+    return lambda *args,**kwargs: not f(*args, **kwargs) 
+
+def is_property_required(prop):
+    return bool(prop.get("required", False))
+
 class Session:
     def __init__(self, config_file):
         with open(config_file) as f:
@@ -77,6 +83,7 @@ class Session:
 
     def check(self):
         self.check_prefixes()
+        self.check_required_properties()
 
     def expand_qname(self, p):
         if not ":" in p:
@@ -99,6 +106,24 @@ class Session:
             if not p.get("jsonld"):
                 raise Exception("'jsonld' missing for %s" % p)
 
+    def check_required_properties(self):
+        # Check that every index+type have at least one
+        # required triple (rdf:type or a property)
+
+        for p in self.conf["common_properties"]:
+            if type(p) != str and is_property_required(p):
+                return # Great! required for every index
+
+        # if not, we'll need to check each index+type
+        for index,index_conf in self.conf["indexes"].items():
+            for doc_type,type_conf in index_conf.items():
+                if "type" in type_conf:
+                    continue # OK
+                for p in type_conf.get("properties", []):
+                    if is_property_required(p):
+                        continue # OK
+                raise Exception("No type: or property with required:true for %s %s" % (index, doc_type))
+
     def check_prefixes(self):
         for uri in self.conf.get("prefixes", {}).values():
             if not (uri.endswith("#") or uri.endswith("/")):
@@ -109,12 +134,13 @@ class Session:
             self.check_property(p)
         for index,index_conf in self.conf["indexes"].items():
             for doc_type,type_conf in index_conf.items():
+                if "type" in type_conf:
+                    urlparse(self.expand_qname(type_conf["type"]))
                 for p in type_conf.get("properties", []):
                     self.check_property(p)
+                    
 
 
-def negate(f):
-    return lambda *args,**kwargs: not f(*args, **kwargs) 
 
 class Indexer:
     def __init__(self, session, index, doc_type):
@@ -129,7 +155,7 @@ class Indexer:
         self.blanknodes = {}
 
     def sort_properties(self, properties):
-        properties.sort(key=negate(self.is_property_required))
+        properties.sort(key=negate(is_property_required))
         return properties
 
     def reset_stats(self):
@@ -146,12 +172,10 @@ class Indexer:
             file=sys.stderr)
         return u
 
-    def is_property_required(self, prop):
-        return bool(prop.get("required", False))
 
     def sparql_property(self, prop):
         sparql = "    ?%s %s ?%s ." % (ID, prop["sparql"], prop["variable"])
-        if not self.is_property_required(prop):
+        if not is_property_required(prop):
             return self.sparql_optional(sparql)
         return sparql
 
