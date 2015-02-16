@@ -59,6 +59,8 @@ the <a href="http://www.openphacts.org/">Open PHACTS</a> project.
   <li><a href="?q=prefLabel:histamine%20_type:compound">prefLabel:histamine _type:compound</a></li>
   <li><a href="?q=title:histamine%20_type:target">title:histamine _type:target</a></li>
   <li><a href="?q=histamine%20_type:enzyme">histamine _type:enzyme</a></li>
+  <li><a href="?q=antigen:CD99">antigen:CD99</a></li>
+  <li><a href="?q=internationalNonpropriatoryName:%22Eptacog%20alfa%22">internationalNonpropriatoryName:"Eptacog alfa"</a></li>
 </ul>
 </div>
 
@@ -103,15 +105,39 @@ function render_desc(d) {
 
 function render_hit(hit, inc_score) {
    doc = hit._source;
-   names = merge_lists([doc.prefLabel, doc.title, doc.label, hit._id]);
+   names = merge_lists([doc.prefLabel, doc.title, doc.label, doc.mnemonic, doc.shortName, doc.fullName, hit._id]);
    name = names[0]; // fallback: URI from hit._id
 
    if (hit.hasOwnProperty("highlight")) {
      // Only show highlighted fields
       h = hit.highlight;
-      descs = uniq(merge_lists([h.prefLabel, h.title, h.label, h.description, h.altLabel ]));
+      descs = uniq(merge_lists([h.prefLabel, h.title, h.label, h.description, h.altLabel, 
+h.mnemonic, 
+h.oldMnemonic, 
+h.shortName,
+h.fullName,
+h.ecName,
+h.altFullName,
+h.antigen,
+h.altEcName,
+h.altShortName
+            ]));
+
+
     } else {
-      descs = uniq(merge_lists([name], [doc.prefLabel, doc.title, doc.label, doc.description, doc.altLabel ])).slice(1);;
+      descs = uniq(merge_lists([name], [doc.prefLabel, doc.title, doc.label, doc.description, doc.altLabel, 
+doc.mnemonic, 
+doc.oldMnemonic, 
+doc.shortName, 
+doc.fullName,
+doc.ecName,
+doc.altFullName,
+doc.antigen,
+doc.altEcName,
+doc.altShortName
+
+            
+            ])).slice(1);;
     }
    html = "<li><a href='" + explorer_uri(hit) + "'>" + name + "</a> <small>" + 
        descs.map(render_desc) + "</small> " +
@@ -134,8 +160,9 @@ function search(query) {
                   query_string: { 
                       query: query,
                       default_operator: "AND"
-                    }
+                    },
                 },
+                size: 25,
                 highlight: {
                   "pre_tags" : ["<strong>"],
                   "post_tags" : ["</strong>"],
@@ -145,7 +172,16 @@ function search(query) {
                     prefLabel: {},
                     altLabel: {},
                     label: {},
-                    description: {}
+                    description: {},
+                    mnemonic: {}, 
+                    oldMnemonic: {},
+                    shortName: {},
+                    fullName: {},
+                    ecName: {},
+                    altFullName: {},
+                    antigen: {},
+                    altEcName: {},
+                    altShortName: {}
                   }
                 }
               };
@@ -161,12 +197,16 @@ function search(query) {
                success: function(data) {
                   $("#resultlist").empty();
                   $("#stats").empty();
-                  $("#stats").append(data.hits.total + " hits for <kbd>" + query + "</kbd>");
+                  $("#stats").append(data.hits.total + " hits for <kbd>" + query + "</kbd>:");
                           $.each(data.hits.hits, function(i,hit){
                             $("#resultlist").append(render_hit(hit, true));
                               
                         });
-                      }
+                  var rest = data.hits.total - data.hits.hits.length;
+                  if (rest > 0) {
+                    $("#resultlist").append("... and " + rest + " more");
+                  }
+               }
   };
   $.ajax(ajax);
 	$("#tmpresults").hide();
@@ -191,11 +231,15 @@ $("#q").on("input", function () {
     $("#tmpresultlist").empty();
     $("#tmpstats").empty();
 
-    $("#tmpstats").append(data.hits.total + " hits for <kbd>" + search + "</kbd>");
+    $("#tmpstats").append(data.hits.total + " hits for <kbd>" + search + "</kbd>:");
 
     $.each(data.hits.hits, function(i,hit){
       $("#tmpresultlist").append(render_hit(hit, false));
     });
+    var rest = data.hits.total - data.hits.hits.length;
+    if (rest > 0) {
+      $("#tmpresultlist").append("... and " + rest + " more");
+    }
   });
 }) //.change();
 
