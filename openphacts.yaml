@@ -12,7 +12,7 @@ prefixes:
   dc: http://purl.org/dc/elements/1.1/
   skos: http://www.w3.org/2004/02/skos/core#
   chembl: http://rdf.ebi.ac.uk/terms/chembl#
-  cheminf: http://www.semanticweb.org/ontologies/cheminf.owl#
+  cheminfo: http://semanticscience.org/resource/
   uniprot: http://purl.uniprot.org/core/
   drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/
 
@@ -59,13 +59,26 @@ indexes:
     compound:
       graph: http://ops.rsc.org
       properties:
-        - cheminf:CHEMINF_000476
-        - cheminf:CHEMINF_000465
-        - cheminf:CHEMINF_000466
-        - cheminf:CHEMINF_000490
+        - sparql: cheminf:CHEMINF_000476
+          variable: title
+          jsonld: title
+          optional: false
+        - sparql: cheminf:CHEMINF_000465
+          variable: validatedSynonym
+          jsonld: validatedSynonym
+          optional: true
+        - sparql: cheminf:CHEMINF_000466
+          variable: unvalidatedSynonym
+          jsonld: unvalidatedSynonym
+          optional: true
+        - sparql: cheminf:CHEMINF_000490
+          variable: molecularFormula
+          jsonld: molecularFormula
+          optional: true
   uniprot:
     target:
       graph: http://purl.uniprot.org
+      type: uniprot:Protein
       properties:
         - uniprot:mnemonic
         - uniprot:oldMnemonic
@@ -88,7 +101,7 @@ indexes:
         - sparql: uniprot:alternativeName/uniprot:ecName
           variable: altEcName
           jsonld: altEcName
-        - sparql: uniprot:alternativeName/uniprot:internationalNonpropriatoryName
+        - sparql: uniprot:alternativeName/uniprot:internationalNonproprietaryName
           variable: internationalNonpropriatoryName
           jsonld: internationalNonpropriatoryName
         - sparql: uniprot:alternativeName/uniprot:cdAntigenName
