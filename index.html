@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<meta http-equiv="X-UA-Compatible" content="IE=edge">     
+<meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">      
 
 <title>ops.s11.no</title>
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.css" rel="stylesheet" type="text/css" />
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.css" rel="stylesheet" type="text/css" />
 <style type="text/css">
-  .score {
-    color: gray;
-  }
-  .desc { 
-    background: #eee;
-  }
+.score {
+  color: gray;
+}
+.desc { 
+  background: #eee;
+}
 </style>
 </head>
 <body>
@@ -53,6 +53,12 @@ the <a href="http://www.openphacts.org/">Open PHACTS</a> project.
 <div id="tmpresults">
   <div id="tmpstats"></div>
 <ul id="tmpresultlist">
+  <li>Examples:</li>
+  <li><a href="?q=histamine">histamine</a></li>
+  <li><a href="?q=histamine%20organism:taurus">histamine organism:taurus</a></li>
+  <li><a href="?q=prefLabel:histamine%20_type:compound">prefLabel:histamine _type:compound</a></li>
+  <li><a href="?q=title:histamine%20_type:target">title:histamine _type:target</a></li>
+  <li><a href="?q=histamine%20_type:enzyme">histamine _type:enzyme</a></li>
 </ul>
 </div>
 
@@ -155,7 +161,7 @@ function search(query) {
                success: function(data) {
                   $("#resultlist").empty();
                   $("#stats").empty();
-                          $("#stats").append(data.hits.total + " hits for " + $("#q").val());
+                  $("#stats").append(data.hits.total + " hits for <kbd>" + $("#q").val() + "</kbd>");
                           $.each(data.hits.hits, function(i,hit){
                             $("#resultlist").append(render_hit(hit, true));
                               
@@ -185,7 +191,7 @@ $("#q").on("input", function () {
     $("#tmpresultlist").empty();
     $("#tmpstats").empty();
 
-    $("#tmpstats").append(data.hits.total + " hits for " + search);
+    $("#tmpstats").append(data.hits.total + " hits for <kbd>" + search + "</kbd>");
 
     $.each(data.hits.hits, function(i,hit){
       $("#tmpresultlist").append(render_hit(hit, false));
@@ -194,7 +200,7 @@ $("#q").on("input", function () {
 }) //.change();
 
 function check_query() {
-    $("#tmpresults").hide();
+//    $("#tmpresults").hide();
     $("#results").hide();
     var uri = new URI();
     if (uri.hasQuery("q")) {
