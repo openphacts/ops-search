@@ -40,7 +40,8 @@ def negate(f):
     return lambda *args,**kwargs: not f(*args, **kwargs) 
 
 def is_property_required(prop):
-    return bool(prop.get("required", False))
+    is_required = bool(prop.get("required", False))
+    return is_required
 
 class Session:
     def __init__(self, config_file):
@@ -119,9 +120,8 @@ class Session:
             for doc_type,type_conf in index_conf.items():
                 if "type" in type_conf:
                     continue # OK
-                for p in type_conf.get("properties", []):
-                    if is_property_required(p):
-                        continue # OK
+                if filter(is_property_required, type_conf.get("properties", [])):
+                    continue # OK
                 raise Exception("No type: or property with required:true for %s %s" % (index, doc_type))
 
     def check_prefixes(self):
