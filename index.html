@@ -15,6 +15,18 @@
 .desc { 
   background: #eee;
 }
+.type {
+  text-transform: capitalize;
+  font-size: smaller;
+  font-style: normal;
+  font-variant: small-caps;
+}
+.turtle { 
+  font-size: smaller;
+  display: block;
+  background: white;
+  color: #555;
+}
 </style>
 </head>
 <body>
@@ -139,14 +151,19 @@ doc.altShortName
             
             ])).slice(1);;
     }
-   html = "<li><a href='" + explorer_uri(hit) + "'>" + name + "</a> <small>" + 
+   html = "<li><a href='" + explorer_uri(hit) + "'>" + name + "</a>" + 
+     " <em class='type'>" +  hit._type +  "</em> " +
+     "<small>" + 
        descs.map(render_desc) + "</small> " +
 			"<em>"+(doc.organism || "") + "</em> ";
  if(inc_score) {
   html = html + "<span class='score'>" + hit._score + "</span>" ; 
  }
- html = html + " <small>&lt;<a href='" + hit._id + "'>" + 
-     hit._id + "</a>&gt;</small> " + "</li>";
+ html = html + " <code class='turtle'> &lt;<a href='" + hit._id + "'>" + 
+     hit._id + "</a>&gt; a " + 
+     doc["@type"] + " .</code>"+ 
+//     " <small class='index'>" + hit._index + "</small> " + 
+     "</li>";
  return html;
 }
 
