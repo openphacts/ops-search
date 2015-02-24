@@ -430,7 +430,10 @@ def main(*args):
         args = args - dryrunOpts
 
     if not args or args.intersection(set(("-h", "--help"))):
-        print("Usage: %s [config]" % sys.argv[0])
+        print("Usage: %s [-d] [-h] [config]" % sys.argv[0])
+        print("")
+        print("-h --help     print this help")
+        print("-d --dry-run  no network activities, just print the SPARQL")
         print("")
         print("See example.yaml for an example configuraton file")
         print("and README.md for details.")
