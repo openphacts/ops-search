@@ -49,10 +49,10 @@ class Session:
             self.conf = yaml.load(f)
 
         es_hosts = self.conf.get("elasticsearch")
-        print("*****")
-        print("SPARQL endpoint: " + self.conf["sparql"]["uri"])
-        print("ElasticSearch: %s" % es_hosts)
-        print("*****")
+        print("###")
+        print("# SPARQL endpoint: " + self.conf["sparql"]["uri"])
+        print("# ElasticSearch: %s" % es_hosts)
+        print("###")
         self.es = Elasticsearch(es_hosts)
 
         self.urlOpener = FancyURLopener()
@@ -81,6 +81,14 @@ class Session:
                 indexer = Indexer(self, index, doc_type)
                 ## TODO: Store mapping for JSON-LD
                 indexer.load()
+
+    def dryrun(self):
+        for index in self.conf["indexes"]:
+            for doc_type in self.conf["indexes"][index]:
+                print("## index/type:", index, doc_type)
+                indexer = Indexer(self, index, doc_type)
+                # below should print the sparql
+                indexer.sparql()
 
     def check(self):
         self.check_prefixes()
@@ -240,7 +248,7 @@ class Indexer:
             sparql.append("LIMIT %s" % self.session.conf["sparql"]["limit"])
 
         sparqlStr = "\n".join(sparql)
-        print("SPARQL query:")
+        print("# SPARQL query:")
         print()
         print(sparqlStr)
         print()
@@ -414,15 +422,31 @@ class Indexer:
         self.print_statistics()
 
 def main(*args):
-    if not args or args[0] in ("-h", "--help"):
+    args = set(args)
+
+    dryrunOpts = set(("-d", "--dry-run", "--dryrun"))
+    dryrun = args.intersection(dryrunOpts)
+    if dryrun:
+        args = args - dryrunOpts
+
+    if not args or args.intersection(set(("-h", "--help"))):
         print("Usage: %s [config]" % sys.argv[0])
         print("")
         print("See example.yaml for an example configuraton file")
         print("and README.md for details.")
         return 0
-    session = Session(args[0])
+
+    if len(args) > 1:
+        print("Unexpected additional arguments:", " ".join(args), file=sys.stderr)
+        return 1
+
+    session = Session(args.pop())
     session.check()
-    session.run()
+    if dryrun:
+        print("### DRY RUN -- no indexes modified")
+        session.dryrun()
+    else:
+        session.run()
 
 
 
