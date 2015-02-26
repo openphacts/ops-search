@@ -15,6 +15,9 @@ prefixes:
   cheminf: http://semanticscience.org/resource/
   uniprot: http://purl.uniprot.org/core/
   drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/
+  obohash: http://purl.obolibrary.org/obo#
+  oboslash: http://purl.obolibrary.org/obo/
+
 
 
 sparql:
@@ -138,13 +141,26 @@ indexes:
       properties:
         - drugbank:geneName
         - drugbank:name
+  chebi:
+    compound:
+      graph: http://www.ebi.ac.uk/chebi
+      type: owl:Class
+      #subClassOf: obo:CHEBI_23367 # molecular entity
+      properties:
+        - rdfs:description
+        - dc:title
+        - dc:description
+        - obohash:Synonym
+        - obohash:xref
+        - obohash:Definition
+
+  
 
 ## what about these?
 # graph: http://rdf.imim.es
 # graph: http://linkedct.org
 # graph: http://aers.data2semantics.org/
 # graph: http://www.nextprot.org
-# graph: http://www.ebi.ac.uk/chebi
 # graph: http://www.geneontology.org
 # graph: http://purl.uniprot.org/enzyme
 # graph: http://www.openphacts.org/api/datasetDescriptors
