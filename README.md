@@ -28,8 +28,8 @@ You will need Python 3 and pip, in addition to some dependencies.
 
 In Ubuntu 14.04, this easiest achieved using:
 
-    sudo apt-get install git python3-pip libyajl2 python3-yaml
-    sudo pip3 install elasticsearch ijson yajl
+    sudo apt-get install git python3-pip libyajl2 python3-yaml python3-bottle
+    sudo pip3 install elasticsearch ijson yajl mimerender
 
 You will also need an [ElasticSearch](http://www.elasticsearch.org) installation. You can test it out with [Docker](https://www.docker.com/):
 

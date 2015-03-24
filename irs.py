@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
-from bottle import route, run, Bottle, get, post, request, static_file
+from bottle import route, run, Bottle, get, post, request, response, static_file
 import os.path
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
 import yaml
 import sys
+from mimerender import BottleMimeRender
+produces = BottleMimeRender()
 
 conf = {}
 
@@ -45,8 +47,20 @@ def es_search(query):
 def index():
     return static_file("index.html", static_root)
 
+def render_json(**json):
+    return json
+
+def render_html(**json):
+    return "<pre>%s</pre>" % json
+
 @get("/search/:query")
+@produces(
+    default = "json",
+    json = render_json,
+    html = render_html
+)
 def search_json(query):
+    response.set_header("Content-Type", "application/ld+json")
     json = { "@context": {"@vocab": "http://example.com/"}, "@id": "/search/%s" % query, "query": query, "hits": [] }
     hits = json["hits"]
     search = es_search(query)
