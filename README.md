@@ -20,7 +20,10 @@ The additional Python libraries used are:
 * [PyYaml](https://pypi.python.org/pypi/pyaml/) ([WTFPL license](https://github.com/mk-fg/pretty-yaml/blob/master/COPYING))
 * [ijson](https://pypi.python.org/pypi/ijson/) ([BSD license](https://github.com/isagalaev/ijson/blob/master/LICENSE.txt))
 * [yajl](https://pypi.python.org/pypi/yajl) (optional) ([BSD license?](https://github.com/rtyler/py-yajl/issues/28))
-
+* bottle
+* mimerender
+* rdflib
+* rdflib-jsonld
 
 ## Installation
 
@@ -29,7 +32,7 @@ You will need Python 3 and pip, in addition to some dependencies.
 In Ubuntu 14.04, this easiest achieved using:
 
     sudo apt-get install git python3-pip libyajl2 python3-yaml python3-bottle
-    sudo pip3 install elasticsearch ijson yajl mimerender
+    sudo pip3 install elasticsearch ijson yajl mimerender rdflib rdflib-jsonld
 
 You will also need an [ElasticSearch](http://www.elasticsearch.org) installation. You can test it out with [Docker](https://www.docker.com/):
 

@@ -6,8 +6,14 @@ from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
 import yaml
 import sys
-from mimerender import BottleMimeRender
-produces = BottleMimeRender()
+import json
+from rdflib import Graph, plugin
+import mimerender
+
+mimerender.register_mime("turtle", ("text/turtle","text/n3"))
+mimerender.register_mime("rdfxml", ("application/rdf+xml", "application/xml"))
+mimerender.register_mime("nt", ("application/n-triples",))
+produces = mimerender.BottleMimeRender()
 
 conf = {}
 
@@ -47,17 +53,19 @@ def es_search(query):
 def index():
     return static_file("index.html", static_root)
 
-def render_json(**json):
-    return json
+def render_rdf(doc, format):
+    g = Graph().parse(data=json.dumps(doc), format="json-ld")
+    return g.serialize(format=format)
 
-def render_html(**json):
-    return "<pre>%s</pre>" % json
 
 @get("/search/:query")
 @produces(
     default = "json",
-    json = render_json,
-    html = render_html
+    json = lambda **doc: doc,
+    html = lambda **doc: "<pre>%s</pre>" % doc,
+    turtle = lambda **doc: render_rdf(doc, "turtle"),
+    rdfxml = lambda **doc: render_rdf(doc, "xml"),
+    nt = lambda **doc: render_rdf(doc, "nt")
 )
 def search_json(query):
     response.set_header("Content-Type", "application/ld+json")
