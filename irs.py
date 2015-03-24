@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from bottle import route, run, Bottle, get, post, request, response, static_file
+from bottle import route, run, Bottle, get, post, request, response, static_file, url
+from urllib.parse import quote
 import os.path
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
@@ -55,7 +56,7 @@ def index():
     return static_file("index.html", static_root)
 
 def render_rdf(doc, format):
-    g = Graph().parse(data=json.dumps(doc), format="json-ld")
+    g = Graph().parse(data=json.dumps(doc), format="json-ld", publicID=request.url)
     return g.serialize(format=format)
 
 
@@ -71,7 +72,8 @@ def render_rdf(doc, format):
     nt = lambda **doc: render_rdf(doc, "nt")
 )
 def search_json(query):
-    json = { "@context": {"@vocab": "http://example.com/"}, "@id": "/search/%s" % query, "query": query, "hits": [] }
+    id = quote(url("/search/:query", query=query))
+    json = { "@context": {"@vocab": "http://example.com/"}, "@id": id, "query": query, "hits": [] }
     hits = json["hits"]
     search = es_search(query)
     for hit in search["hits"]["hits"]:
