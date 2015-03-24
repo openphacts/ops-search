@@ -10,6 +10,7 @@ import sys
 import json
 from rdflib import Graph, plugin
 import mimerender
+import cgi
 
 mimerender.register_mime("turtle", ("text/turtle","text/n3"))
 mimerender.register_mime("rdfxml", ("application/rdf+xml", "application/xml"))
@@ -59,14 +60,16 @@ def render_rdf(doc, format):
     g = Graph().parse(data=json.dumps(doc), format="json-ld", publicID=request.url)
     return g.serialize(format=format)
 
+def json_pretty(doc):
+    return json.dumps(doc, indent=4, sort_keys=True)
 
 @get("/search/:query")
 @produces(
     default = "json",
     #json = lambda **doc: doc,
-    json = lambda **doc: json.dumps(doc, indent=4, sort_keys=True),
+    json = lambda **doc: json_pretty(doc),
     jsonld = lambda **doc: json.dumps(doc),
-    html = lambda **doc: "<pre>%s</pre>" % doc,
+    html = lambda **doc: "<!DOCTYPE html><html><body><pre>%s</pre></body></html>" % cgi.escape(json_pretty(doc)),
     turtle = lambda **doc: render_rdf(doc, "turtle"),
     rdfxml = lambda **doc: render_rdf(doc, "xml"),
     nt = lambda **doc: render_rdf(doc, "nt")
