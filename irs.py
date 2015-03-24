@@ -46,12 +46,13 @@ def index():
     return static_file("index.html", static_root)
 
 @get("/search/:query")
-def search(query):
+def search_json(query):
     json = { "@context": {"@vocab": "http://example.com/"}, "@id": "/search/%s" % query, "query": query, "hits": [] }
     hits = json["hits"]
     search = es_search(query)
     for hit in search["hits"]["hits"]:
-        hits.append({"@id": hit["_id"]})
+        hits.append(hit["_source"])
+        #hits.append({"@id": hit["_id"]})
     return json
 
 
