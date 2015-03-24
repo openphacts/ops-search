@@ -71,7 +71,6 @@ def render_rdf(doc, format):
     nt = lambda **doc: render_rdf(doc, "nt")
 )
 def search_json(query):
-    response.set_header("Content-Type", "application/ld+json")
     json = { "@context": {"@vocab": "http://example.com/"}, "@id": "/search/%s" % query, "query": query, "hits": [] }
     hits = json["hits"]
     search = es_search(query)
