@@ -13,6 +13,7 @@ import mimerender
 mimerender.register_mime("turtle", ("text/turtle","text/n3"))
 mimerender.register_mime("rdfxml", ("application/rdf+xml", "application/xml"))
 mimerender.register_mime("nt", ("application/n-triples",))
+#mimerender.register_mime("jsonld", ("application/ld+json",))
 produces = mimerender.BottleMimeRender()
 
 conf = {}
@@ -61,7 +62,9 @@ def render_rdf(doc, format):
 @get("/search/:query")
 @produces(
     default = "json",
-    json = lambda **doc: doc,
+    #json = lambda **doc: doc,
+    json = lambda **doc: json.dumps(doc, indent=4, sort_keys=True),
+    jsonld = lambda **doc: json.dumps(doc),
     html = lambda **doc: "<pre>%s</pre>" % doc,
     turtle = lambda **doc: render_rdf(doc, "turtle"),
     rdfxml = lambda **doc: render_rdf(doc, "xml"),
