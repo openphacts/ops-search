@@ -36,7 +36,7 @@ In Ubuntu 14.04, this easiest achieved using:
 
 You will also need an [ElasticSearch](http://www.elasticsearch.org) installation. You can test it out with [Docker](https://www.docker.com/):
 
-    docker run --name elasticsearch -d -p 9200:9200 dockerfile/elasticsearch
+    docker run --name elasticsearch -d -p 9200:9200 elasticsearch
 
 You can test this at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)
 
