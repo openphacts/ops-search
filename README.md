@@ -38,7 +38,9 @@ You will also need an [ElasticSearch](http://www.elasticsearch.org) installation
 
     docker run --name elasticsearch -d -p 9200:9200 dockerfile/elasticsearch
 
-You can test this at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)
+You can test this at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)  
+
+Note: On OSX you may need to find the actual IP address that [boot2docker](https://github.com/boot2docker) is using Try `boot2docker ip` and then use that when testing in a browser eg `http://192.168.59.103:9200/_search?q=alice`
 
 ## Running
 
