@@ -1,0 +1,55 @@
+
+elasticsearch:
+  - host: localhost
+    port: 9200
+#  - host: docker
+#    port: 9200
+
+prefixes:
+  rdfs: http://www.w3.org/2000/01/rdf-schema#
+  owl: http://www.w3.org/2002/07/owl#
+  dct: http://purl.org/dc/terms/
+  dc: http://purl.org/dc/elements/1.1/
+  skos: http://www.w3.org/2004/02/skos/core#
+  chembl: http://rdf.ebi.ac.uk/terms/chembl#
+  cheminf: http://semanticscience.org/resource/
+  uniprot: http://purl.uniprot.org/core/
+  drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/
+  obohash: http://purl.obolibrary.org/obo#
+  oboslash: http://purl.obolibrary.org/obo/
+
+
+sparql:
+  #uri: http://sparql:8890/sparql
+  #uri: http://ops2.few.vu.nl:3030/chembl19/sparql
+  uri: http://ops2.few.vu.nl:8890/sparql
+  timeout_s: 7200 # e.g. 2 hours
+
+common_properties:
+  - rdfs:label
+
+indexes:
+  chebi:
+    compound:
+      graph: http://www.ebi.ac.uk/chebi
+      type: owl:Class 
+      properties:
+        - rdfs:description
+        - dc:title
+        - dc:description
+        - obohash:Synonym
+        - obohash:xref
+        - obohash:Definition
+  
+
+## what about these?
+# graph: http://rdf.imim.es
+# graph: http://linkedct.org
+# graph: http://aers.data2semantics.org/
+# graph: http://www.nextprot.org
+# graph: http://www.ebi.ac.uk/chebi
+# graph: http://www.geneontology.org
+# graph: http://purl.uniprot.org/enzyme
+# graph: http://www.openphacts.org/api/datasetDescriptors
+# graph: http://www.geneontology.org/terms
+# graph: http://www.wikipathways.org#

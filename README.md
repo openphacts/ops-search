@@ -6,6 +6,9 @@ Populates an [ElasticSearch](http://www.elasticsearch.org) instance with [JSON-L
 documents with searchable labels extracted from [SPARQL queries](http://www.w3.org/TR/sparql11-query/) from
 a configured [SPARQL service](http://www.w3.org/TR/sparql11-protocol/).
 
+Exposes a Linked Data web service for searcing over the indexed labels, with
+content negotiation for JSON, JSON-LD, Turtle, RDF/XML etc.
+
 
 ## License
 License: [MIT license](http://opensource.org/licenses/MIT)
@@ -35,19 +38,27 @@ In Ubuntu 14.04, this easiest achieved using:
     sudo apt-get install git python3-pip libyajl2 python3-yaml python3-bottle
     sudo pip3 install elasticsearch ijson yajl mimerender rdflib rdflib-jsonld
 
-You will also need an [ElasticSearch](http://www.elasticsearch.org) installation (tested with version 1.4). You can test it out with [Docker](https://www.docker.com/):
+You will also need an [ElasticSearch](http://www.elasticsearch.org)
+installation (tested with version 1.4), with dynamic Groovy [scripting
+enabled](http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_enabling_dynamic_scripting)
 
-    docker run --name elasticsearch -d -p 9200:9200 elasticsearch:1.4
+The simplest way to do this is to use the [included elasticsearch](elasticsearch) [Docker](https://www.docker.com/) image:
 
-You can test this at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)  
+    docker run --name elasticsearch -d -p 9200:9200 openphacts/elasticsearch
 
-Note: On OSX you may need to find the actual IP address that [boot2docker](https://github.com/boot2docker) is using. Try `boot2docker ip` and then use that when testing in a browser eg `http://192.168.59.103:9200/_search?q=alice`
+You verify this install at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)  
+
+_Note: On OSX you may need to find the actual IP address that [boot2docker](https://github.com/boot2docker) is using. Try `boot2docker ip` and then use that when testing in a browser eg `http://192.168.59.103:9200/_search?q=alice`_
 
 ## Running
 
-To run using the [configuration](#Configuration) in `example.yaml`, do:
+To populate elastic search using the [configuration](#Configuration) in `example.yaml`, do:
 
-    python3 populate_elasticsearch.py example.yaml
+    python3 src/populate_elasticsearch.py conf/example.yaml
+
+To run the server for the API, using the same configuration, do:
+  
+    python3 src/api.py conf/example.yaml
 
 
 ## Configuration
