@@ -35,13 +35,13 @@ In Ubuntu 14.04, this easiest achieved using:
     sudo apt-get install git python3-pip libyajl2 python3-yaml python3-bottle
     sudo pip3 install elasticsearch ijson yajl mimerender rdflib rdflib-jsonld
 
-You will also need an [ElasticSearch](http://www.elasticsearch.org) installation. You can test it out with [Docker](https://www.docker.com/):
+You will also need an [ElasticSearch](http://www.elasticsearch.org) installation (tested with version 1.4). You can test it out with [Docker](https://www.docker.com/):
 
-    docker run --name elasticsearch -d -p 9200:9200 elasticsearch
+    docker run --name elasticsearch -d -p 9200:9200 elasticsearch:1.4
 
 You can test this at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)  
 
-Note: On OSX you may need to find the actual IP address that [boot2docker](https://github.com/boot2docker) is using Try `boot2docker ip` and then use that when testing in a browser eg `http://192.168.59.103:9200/_search?q=alice`
+Note: On OSX you may need to find the actual IP address that [boot2docker](https://github.com/boot2docker) is using. Try `boot2docker ip` and then use that when testing in a browser eg `http://192.168.59.103:9200/_search?q=alice`
 
 ## Running
 
