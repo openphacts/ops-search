@@ -1,5 +1,6 @@
-# openphacts-irs
-IRS2 data loading scripts
+# ops-search - Open PHACTS search service
+
+This is the search service for [Open PHACTS](http://openphacts.org/), previously called *IRS2*.
 
 Populates an [ElasticSearch](http://www.elasticsearch.org) instance with [JSON-LD](http://www.w3.org/TR/json-ld/)
 documents with searchable labels extracted from [SPARQL queries](http://www.w3.org/TR/sparql11-query/) from
