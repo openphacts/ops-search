@@ -54,7 +54,7 @@ _Note: On OSX you may need to find the actual IP address that [boot2docker](http
 
 To populate elastic search using the [configuration](#Configuration) in `example.yaml`, do:
 
-    python3 src/populate_elasticsearch.py conf/example.yaml
+    python3 src/load.py conf/example.yaml
 
 To run the server for the API, using the same configuration, do:
   
