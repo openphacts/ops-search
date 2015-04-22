@@ -101,11 +101,11 @@ def search_json(query=None):
     return json
 
 
-def main(config_file, *args):
+def main(config_file, port="8839", *args):
     global conf
     with open(config_file) as f:
         conf = yaml.load(f)
-    run(host='localhost', port=8839, reloader=True)
+    run(host='localhost', port=int(port), reloader=True)
 
 if __name__ == "__main__":
    main(*sys.argv[1:])
