@@ -44,7 +44,7 @@ enabled](http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-
 
 The simplest way to do this is to use the [included elasticsearch](elasticsearch) [Docker](https://www.docker.com/) image:
 
-    docker run --name elasticsearch -d -p 9200:9200 openphacts/elasticsearch
+    docker run --name elasticsearch -d -p 9200:9200 openphacts/ops-search-elasticsearch
 
 You verify this install at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)  
 
