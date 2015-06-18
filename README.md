@@ -64,7 +64,7 @@ To run the server for the API, using the same configuration, do:
 ## Configuration
 
 You need to create a config file similar to
-[example.yaml](example.yaml) to configure the ElasticSearch data loading.
+[example.yaml](conf/example.yaml) to configure the ElasticSearch data loading.
 
 A description of each element of the configuration follows below:
 
