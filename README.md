@@ -52,7 +52,7 @@ _Note: On OSX you may need to find the actual IP address that [boot2docker](http
 
 ## Running
 
-To populate elastic search using the [configuration](#Configuration) in `example.yaml`, do:
+To populate elastic search using the [configuration](#Configuration) in [example.yaml](conf/example.yaml), do:
 
     python3 src/load.py conf/example.yaml
 
