@@ -85,6 +85,7 @@ def html_pre(json):
     nt = lambda **doc: render_rdf(doc, "nt")
 )
 def search_json(query=None):
+    print("inside " + str(request.query.query_string))
     if query is None:
         # Get from ?q parameter instead, if exist
         query = request.query.q
@@ -102,6 +103,40 @@ def search_json(query=None):
         #hits.append({"@id": hit["_id"]})
     return json
 
+@post("/search")
+@produces(
+    default = "json",
+    #json = lambda **doc: doc,
+    json = lambda **doc: json_pretty(doc),
+    jsonld = lambda **doc: json.dumps(doc),
+    html = lambda **doc: html_pre(doc),
+    turtle = lambda **doc: render_rdf(doc, "turtle"),
+    rdfxml = lambda **doc: render_rdf(doc, "xml"),
+    nt = lambda **doc: render_rdf(doc, "nt")
+)
+def search_json_post(query=None):
+    for l in request.body:
+      print(l)
+    postdata = request.body.read()
+    #print(" ***** " + postdata)
+    #print("inside " + request.forms.get("query_string").get("query").get("query_string"))
+
+    if query is None:
+        # Get from ?q parameter instead, if exist
+        query = request.query.q
+    id = quote(url("/search/<query>", query=query))
+    response.set_header("Content-Location", id)
+    # CORS header
+    response.set_header("Access-Control-Allow-Origin", "*")
+    json = { "@context": {"@vocab": "http://example.com/"}, "@id": id, "query": query, "hits": [] }
+    hits = json["hits"]
+    search = es_search(query)
+    json["total"] = search["hits"]["total"]
+    #print(search)
+    for hit in search["hits"]["hits"]:
+        hits.append(hit["_source"])
+        #hits.append({"@id": hit["_id"]})
+    return json
 
 def main(config_file, port="8839", *args):
     global conf
