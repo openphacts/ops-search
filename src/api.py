@@ -95,6 +95,8 @@ def search_json(query=None):
     json = { "@context": {"@vocab": "http://example.com/"}, "@id": id, "query": query, "hits": [] }
     hits = json["hits"]
     search = es_search(query)
+    json["total"] = search["hits"]["total"]
+    #print(search)
     for hit in search["hits"]["hits"]:
         hits.append(hit["_source"])
         #hits.append({"@id": hit["_id"]})
