@@ -84,7 +84,7 @@ the <a href="http://www.openphacts.org/">Open PHACTS</a> project.
 <script src="https://medialize.github.io/URI.js/src/URI.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 function explorer_uri(hit) {
-  if (hit["@type"][0] == "compound") { 
+  if (hit["@ops_type"] == "compound") { 
       return "https://explorer.openphacts.org/compounds?uri=" + hit["@id"];
   } else {
       return "https://explorer.openphacts.org/targets?uri=" + hit["@id"];

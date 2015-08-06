@@ -99,7 +99,9 @@ def search_json(query=None):
     for hit in search["hits"]["hits"]:
         source = hit["_source"]
         score = hit["_score"]
+        ops_type = hit["_type"]
         source["@score"] = score
+        source["@ops_type"] = ops_type
         hits.append(source)
     return json
 
@@ -127,7 +129,9 @@ def search_json_post(query=None):
     for hit in search["hits"]["hits"]:
         source = hit["_source"]
         score = hit["_score"]
+        ops_type = hit["_type"]
         source["@score"] = score
+        source["@ops_type"] = ops_type
         hits.append(source)
     return json
 
