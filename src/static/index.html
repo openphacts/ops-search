@@ -206,7 +206,7 @@ function search(query) {
 // TODO: Use http://www.elasticsearch.org/blog/client-for-node-js-and-the-browser/ instad
 
 //$.getJSON('search?default_operator=AND&q=' + ( $("#q").val() || "histamine"), function(data) {
-  var ajax = { type: "POST",
+  $.ajax({ type: "POST",
                url: "search",
                data: JSON.stringify(search),
                contentType: "application/json",
@@ -214,9 +214,9 @@ function search(query) {
                success: function(data) {
                   $("#resultlist").empty();
                   $("#stats").empty();
-                  $("#stats").append(data.hits.total + " hits for <kbd>" + query + "</kbd>:");
-                          $.each(data.hits.hits, function(i,hit){
-                            $("#resultlist").append(render_hit(hit, true));
+                  $("#stats").append(data.total + " hits for <kbd>" + query + "</kbd>:");
+                          data.hits.forEach(function(hit){
+                            $("#resultlist").append(render_hit(hit, false));
                               
                         });
                   var rest = data.total - data.hits.length;
@@ -224,8 +224,8 @@ function search(query) {
                     $("#resultlist").append("... and " + rest + " more");
                   }
                }
-  };
-  $.ajax(ajax);
+  });
+  //$.ajax(ajax);
 	$("#tmpresults").hide();
 	$("#results").show();
 }

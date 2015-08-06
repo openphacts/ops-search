@@ -115,15 +115,7 @@ def search_json(query=None):
     nt = lambda **doc: render_rdf(doc, "nt")
 )
 def search_json_post(query=None):
-    for l in request.body:
-      print(l)
-    postdata = request.body.read()
-    #print(" ***** " + postdata)
-    #print("inside " + request.forms.get("query_string").get("query").get("query_string"))
-
-    if query is None:
-        # Get from ?q parameter instead, if exist
-        query = request.query.q
+    query = request.json["query"]["query_string"]["query"]
     id = quote(url("/search/<query>", query=query))
     response.set_header("Content-Location", id)
     # CORS header
