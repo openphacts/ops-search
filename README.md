@@ -48,7 +48,7 @@ The simplest way to do this is to use the [included elasticsearch](elasticsearch
 
 You verify this install at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)  
 
-_Note: On OSXX & Windows you may need to find the actual IP address that [boot2docker](https://github.com/boot2docker) is using. Try `boot2docker ip` and then use that when testing in a browser eg `http://192.168.59.103:9200/_search?q=alice`_
+_Note: On OSX & Windows you may need to find the actual IP address that [boot2docker](https://github.com/boot2docker) is using. Try `boot2docker ip` and then use that when testing in a browser eg `http://192.168.59.103:9200/_search?q=alice`_
 
 ## Running
 
