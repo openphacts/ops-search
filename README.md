@@ -273,7 +273,7 @@ properties must be present in the graph (match by pattern).
 
 ## Request and Response
 
-Send a GET request to `/search` with your query as the `q` parameter eg. `http://example.com/search?q=pfd`. Or POST a query to `/search` with the payload formatted as follows, here the query is for `pfd` with a maximum of 25 `hits` to be included in the response:
+Send a GET request to `/search/` with your query as the last part of the URL eg. `http://example.com/search/pfd`. Or POST a query to `/search` with the payload formatted as follows, here the query is for `pfd` with a maximum of 25 `hits` to be included in the response:
 
 ```json
 {
