@@ -270,3 +270,122 @@ conflicting name (e.g. `dc:title` `dct:title` would be indexed as `title` and
 If a `type` was specified (match by type), then in the the generated query the
 properties are individually made `OPTIONAL`, if not, all the specified
 properties must be present in the graph (match by pattern).
+
+## Request and Response
+
+Send a GET request to `/search` with your query as the `q` parameter eg. `http://example.com/search?q=pfd`. Or POST a query to `/search` with the payload formatted as follows, here the query is for `pfd` with a maximum of 25 `hits` to be included in the response:
+
+```json
+{
+    "query": {
+        "query_string": {
+            "query":"pfd","default_operator":"AND"
+        }
+    },
+    "size":25,
+    "highlight": {
+        "pre_tags": ["<strong>"],
+        "post_tags": ["</strong>"],
+        "fields": {
+            "title":{},
+            "prefLabel":{},
+            "altLabel":{},
+            "label":{},
+            "description":{},
+            "mnemonic":{},
+            "oldMnemonic":{},
+            "shortName":{},
+            "fullName":{},
+            "ecName":{},
+            "altFullName":{},
+            "antigen":{},
+            "altEcName":{},
+            "altShortName": {}
+        }
+    }
+}
+```
+
+The response format (in JSON) is shown below. The `total` number of hits is included in the response and here was `2`:
+
+```json
+{
+    "@context": {
+        "@vocab": "http://example.com/"
+    },
+    "@id": "/search/pfd",
+    "hits": [
+        {
+            "@id": "http://rdf.ebi.ac.uk/resource/chembl/targetcomponent/CHEMBL_TC_6985",
+            "@ops_type": "targetComponent",
+            "@score": 2.3294637,
+            "@type": [
+                "chembl:TargetComponent"
+            ],
+            "altLabel": [
+                "CFD",
+                "Complement factor D",
+                "Adipsin",
+                "C3 convertase activator",
+                "DF ",
+                "PFD",
+                "Properdin factor D"
+            ],
+            "chemblId": [
+                "CHEMBL_TC_6985"
+            ],
+            "description": [
+                "Complement factor D"
+            ],
+            "label": [
+                "CHEMBL_TC_6985"
+            ],
+            "organism": [
+                "Homo sapiens"
+            ]
+        },
+        {
+            "@id": "http://purl.obolibrary.org/obo/CHEBI_31263",
+            "@ops_type": "compound",
+            "@score": 0.73953164,
+            "@type": [
+                "owl:Class"
+            ],
+            "Definition": [
+                "The dipeptide obtained by condensation of N-benzoyl-L-tyrosine with 4-aminobenzoic acid. Used as a noninvasive screening test for exocrine pancreatic insufficiency and to monitor the adequacy of supplemental pancreatic therapy, it is given by mouth: the amount of 4-aminobenzoic acid and its metabolites excreted in the urine is taken as a measure of the chymotrypsin-secreting activity of the pancreas."
+            ],
+            "Synonym": [
+                "(S)-4-((2-(benzoylamino)-3-(4-hydroxyphenyl)-1-oxopropyl)amino)benzoic acid",
+                "4-(N-benzoyl-L-tyrosylamino)benzoic acid",
+                "4-[(N-benzoyl-L-tyrosyl)amino]benzoic acid",
+                "BT-PABA",
+                "BTPABA",
+                "C23H20N2O5",
+                "N-benzoyl-L-tyrosyl-p-aminobenzoate",
+                "N-benzoyl-L-tyrosyl-p-aminobenzoic acid",
+                "PFD",
+                "PFT",
+                "bentiromide",
+                "bentiromido",
+                "bentiromidum",
+                "benzoyltyrosyl-p-aminobenzoic acid",
+                "(S)-p-(alpha-benzamido-p-hydroxyhydrocinnamamido)benzoic acid"
+            ],
+            "label": [
+                "bentiromide"
+            ],
+            "xref": [
+                "Beilstein:2910938",
+                "DrugBank:DB00522",
+                "KEGG DRUG:37106-97-1",
+                "KEGG DRUG:D01346",
+                "Patent:DE2156835",
+                "Patent:US3801562",
+                "Wikipedia:Bentiromide"
+            ]
+        }
+    ],
+    "query": "pfd",
+    "total": 2
+}
+```
