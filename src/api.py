@@ -95,11 +95,41 @@ def search_json(query=None):
     json = { "@context": {"@vocab": "http://example.com/"}, "@id": id, "query": query, "hits": [] }
     hits = json["hits"]
     search = es_search(query)
+    json["total"] = search["hits"]["total"]
     for hit in search["hits"]["hits"]:
-        hits.append(hit["_source"])
-        #hits.append({"@id": hit["_id"]})
+        source = hit["_source"]
+        score = hit["_score"]
+        source["@score"] = score
+        hits.append(source)
     return json
 
+@post("/search")
+@produces(
+    default = "json",
+    #json = lambda **doc: doc,
+    json = lambda **doc: json_pretty(doc),
+    jsonld = lambda **doc: json.dumps(doc),
+    html = lambda **doc: html_pre(doc),
+    turtle = lambda **doc: render_rdf(doc, "turtle"),
+    rdfxml = lambda **doc: render_rdf(doc, "xml"),
+    nt = lambda **doc: render_rdf(doc, "nt")
+)
+def search_json_post(query=None):
+    query = request.json["query"]["query_string"]["query"]
+    id = quote(url("/search/<query>", query=query))
+    response.set_header("Content-Location", id)
+    # CORS header
+    response.set_header("Access-Control-Allow-Origin", "*")
+    json = { "@context": {"@vocab": "http://example.com/"}, "@id": id, "query": query, "hits": [] }
+    hits = json["hits"]
+    search = es_search(query)
+    json["total"] = search["hits"]["total"]
+    for hit in search["hits"]["hits"]:
+        source = hit["_source"]
+        score = hit["_score"]
+        source["@score"] = score
+        hits.append(source)
+    return json
 
 def main(config_file, port="8839", *args):
     global conf

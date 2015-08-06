@@ -84,10 +84,10 @@ the <a href="http://www.openphacts.org/">Open PHACTS</a> project.
 <script src="https://medialize.github.io/URI.js/src/URI.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 function explorer_uri(hit) {
-  if (hit._type == "compound") { 
-      return "http://explorer.cs.man.ac.uk/compounds?uri=" + hit._id;
+  if (hit["@type"][0] == "compound") { 
+      return "https://explorer.openphacts.org/compounds?uri=" + hit["@id"];
   } else {
-      return "http://explorer.cs.man.ac.uk/targets?uri=" + hit._id;
+      return "https://explorer.openphacts.org/targets?uri=" + hit["@id"];
   }
 }
 
@@ -104,8 +104,8 @@ function uniq(a) {
 function merge_lists(lists) {
   var list = []
   lists.forEach(function(l) { 
-      if ($.isArray(l)) {
-        $.merge(list, l);
+      if (Array.isArray(l)) {
+          list = list.concat(l);
       }
     });
   return list
@@ -116,8 +116,8 @@ function render_desc(d) {
 }
 
 function render_hit(hit, inc_score) {
-   doc = hit._source;
-   names = merge_lists([doc.prefLabel, doc.title, doc.label, doc.mnemonic, doc.shortName, doc.fullName, hit._id]);
+   doc = hit;
+   names = merge_lists([doc.prefLabel, doc.title, doc.label, doc.mnemonic, doc.shortName, doc.fullName, hit["@id"]]);
    name = names[0]; // fallback: URI from hit._id
 
    if (hit.hasOwnProperty("highlight")) {
@@ -152,15 +152,15 @@ doc.altShortName
             ])).slice(1);;
     }
    html = "<li><a href='" + explorer_uri(hit) + "'>" + name + "</a>" + 
-     " <em class='type'>" +  hit._type +  "</em> " +
+     " <em class='type'>" +  hit["@type"][0] +  "</em> " +
      "<small>" + 
        descs.map(render_desc) + "</small> " +
-			"<em>"+(doc.organism || "") + "</em> ";
+			"<em>" + (doc.organism || "") + "</em> ";
  if(inc_score) {
-  html = html + "<span class='score'>" + hit._score + "</span>" ; 
+  html = html + "<span class='score'>" + Math.round( hit["@score"] * 100 ) / 100; + "</span>" ; 
  }
- html = html + " <code class='turtle'> &lt;<a href='" + hit._id + "'>" + 
-     hit._id + "</a>&gt; a " + 
+ html = html + " <code class='turtle'> &lt;<a href='" + hit["@id"] + "'>" + 
+     hit["@id"] + "</a>&gt; a " + 
      doc["@type"] + " .</code>"+ 
 //     " <small class='index'>" + hit._index + "</small> " + 
      "</li>";
@@ -206,7 +206,7 @@ function search(query) {
 // TODO: Use http://www.elasticsearch.org/blog/client-for-node-js-and-the-browser/ instad
 
 //$.getJSON('search?default_operator=AND&q=' + ( $("#q").val() || "histamine"), function(data) {
-  var ajax = { type: "POST",
+  $.ajax({ type: "POST",
                url: "search",
                data: JSON.stringify(search),
                contentType: "application/json",
@@ -214,18 +214,18 @@ function search(query) {
                success: function(data) {
                   $("#resultlist").empty();
                   $("#stats").empty();
-                  $("#stats").append(data.hits.total + " hits for <kbd>" + query + "</kbd>:");
-                          $.each(data.hits.hits, function(i,hit){
+                  $("#stats").append(data.total + " hits for <kbd>" + query + "</kbd>:");
+                          data.hits.forEach(function(hit){
                             $("#resultlist").append(render_hit(hit, true));
                               
                         });
-                  var rest = data.hits.total - data.hits.hits.length;
+                  var rest = data.total - data.hits.length;
                   if (rest > 0) {
                     $("#resultlist").append("... and " + rest + " more");
                   }
                }
-  };
-  $.ajax(ajax);
+  });
+  //$.ajax(ajax);
 	$("#tmpresults").hide();
 	$("#results").show();
 }
@@ -248,12 +248,12 @@ $("#q").on("input", function () {
     $("#tmpresultlist").empty();
     $("#tmpstats").empty();
 
-    $("#tmpstats").append(data.hits.total + " hits for <kbd>" + search + "</kbd>:");
+    $("#tmpstats").append(data.total + " hits for <kbd>" + search + "</kbd>:");
 
-    $.each(data.hits.hits, function(i,hit){
+    data.hits.forEach(function(hit, i){
       $("#tmpresultlist").append(render_hit(hit, false));
     });
-    var rest = data.hits.total - data.hits.hits.length;
+    var rest = data.total - data.hits.length;
     if (rest > 0) {
       $("#tmpresultlist").append("... and " + rest + " more");
     }

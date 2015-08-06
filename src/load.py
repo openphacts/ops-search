@@ -15,7 +15,7 @@ from elasticsearch.exceptions import NotFoundError
 
 try:
     import ijson.backends.yajl2 as ijson
-except ex:
+except:
     print("Can't find py-yajl, JSON parsing will be slower")
     import ijson
 
