@@ -85,7 +85,6 @@ def html_pre(json):
     nt = lambda **doc: render_rdf(doc, "nt")
 )
 def search_json(query=None):
-    print("inside " + str(request.query.query_string))
     if query is None:
         # Get from ?q parameter instead, if exist
         query = request.query.q
@@ -97,10 +96,11 @@ def search_json(query=None):
     hits = json["hits"]
     search = es_search(query)
     json["total"] = search["hits"]["total"]
-    #print(search)
     for hit in search["hits"]["hits"]:
-        hits.append(hit["_source"])
-        #hits.append({"@id": hit["_id"]})
+        source = hit["_source"]
+        score = hit["_score"]
+        source["@score"] = score
+        hits.append(source)
     return json
 
 @post("/search")
@@ -124,10 +124,11 @@ def search_json_post(query=None):
     hits = json["hits"]
     search = es_search(query)
     json["total"] = search["hits"]["total"]
-    #print(search)
     for hit in search["hits"]["hits"]:
-        hits.append(hit["_source"])
-        #hits.append({"@id": hit["_id"]})
+        source = hit["_source"]
+        score = hit["_score"]
+        source["@score"] = score
+        hits.append(source)
     return json
 
 def main(config_file, port="8839", *args):

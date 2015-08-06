@@ -157,7 +157,7 @@ doc.altShortName
        descs.map(render_desc) + "</small> " +
 			"<em>" + (doc.organism || "") + "</em> ";
  if(inc_score) {
-  html = html + "<span class='score'>" + hit._score + "</span>" ; 
+  html = html + "<span class='score'>" + Math.round( hit["@score"] * 100 ) / 100; + "</span>" ; 
  }
  html = html + " <code class='turtle'> &lt;<a href='" + hit["@id"] + "'>" + 
      hit["@id"] + "</a>&gt; a " + 
@@ -216,7 +216,7 @@ function search(query) {
                   $("#stats").empty();
                   $("#stats").append(data.total + " hits for <kbd>" + query + "</kbd>:");
                           data.hits.forEach(function(hit){
-                            $("#resultlist").append(render_hit(hit, false));
+                            $("#resultlist").append(render_hit(hit, true));
                               
                         });
                   var rest = data.total - data.hits.length;
