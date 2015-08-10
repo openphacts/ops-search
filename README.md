@@ -273,7 +273,7 @@ properties must be present in the graph (match by pattern).
 
 ## Request and Response
 
-Send a GET request to `/search/` with your query as the last part of the URL eg. `http://example.com/search/pfd` or as the parameter `q` eg `http://example.com/search?q=pfd`. Or POST a query to `/search` with the payload formatted as follows, here the query is for `pfd` with a maximum of 25 `hits` to be included in the response:
+Send a GET request to `/search/` with your query as the last part of the URL eg. `http://example.com/search/pfd` or as the parameter `q` eg `http://example.com/search?q=pfd`. You can also include the branch to search for `b` and the limit `l` eg `http://example.com/search?q=asp&b=chebi&l=10`. Or POST a query to `/search` with the payload formatted as follows, here the query is for `pfd` with a maximum of 25 `hits` to be included in the response:
 
 ```json
 {
@@ -305,6 +305,8 @@ Send a GET request to `/search/` with your query as the last part of the URL eg.
     }
 }
 ```
+
+The possible branches are: chebi, ocrs, uniprot & chembl.
 
 The response format (in JSON) is shown below. The `total` number of hits is included in the response and here was `2`:
 

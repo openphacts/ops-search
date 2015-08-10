@@ -41,16 +41,17 @@ def elasticsearch():
     es = Elasticsearch(es_hosts)
     return es
 
-def es_search(query):
-    search = { "query": {
-                  "query_string": {
-                          "query": query,
+def es_search(query, branch, limit):
+    search = {
+                 "query": {
+                     "query_string": {
+                         "query": query,
                           "default_operator": "AND"
-                        },
-                    },
-                    "size": 25,
+                     },
+                 },
+                 "size": limit,
              }
-    return elasticsearch().search(body = search)
+    return elasticsearch().search(index=branch, body = search)
 
 @get("/")
 def index():
@@ -88,13 +89,17 @@ def search_json(query=None):
     if query is None:
         # Get from ?q parameter instead, if exist
         query = request.query.q
+        branch = request.query.b
+        limit = request.query.l
     id = quote(url("/search/<query>", query=query))
     response.set_header("Content-Location", id)
     # CORS header
     response.set_header("Access-Control-Allow-Origin", "*")
     json = { "@context": {"@vocab": "http://example.com/"}, "@id": id, "query": query, "hits": [] }
     hits = json["hits"]
-    search = es_search(query)
+    if limit == "":
+        limit = "25"
+    search = es_search(query, branch, limit)
     json["total"] = search["hits"]["total"]
     for hit in search["hits"]["hits"]:
         source = hit["_source"]
