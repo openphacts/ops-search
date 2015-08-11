@@ -274,6 +274,7 @@ properties must be present in the graph (match by pattern).
 ## Request and Response
 
 Send a GET request to `/search/` with your query as the last part of the URL eg. `http://example.com/search/pfd` or as the parameter `q` eg `http://example.com/search?q=pfd`. You can also include the branch to search for `b`, the type `t` and the limit `l` eg `http://example.com/search?q=asp&b=chebi&t=compound&l=10`.
+
 The branches are:
 * chebi
 * chembl
