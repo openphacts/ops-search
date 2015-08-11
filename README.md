@@ -6,7 +6,7 @@ Populates an [ElasticSearch](http://www.elasticsearch.org) instance with [JSON-L
 documents with searchable labels extracted from [SPARQL queries](http://www.w3.org/TR/sparql11-query/) from
 a configured [SPARQL service](http://www.w3.org/TR/sparql11-protocol/).
 
-Exposes a Linked Data web service for searcing over the indexed labels, with
+Exposes a Linked Data web service for searching over the indexed labels, with
 content negotiation for JSON, JSON-LD, Turtle, RDF/XML etc.
 
 
