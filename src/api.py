@@ -70,7 +70,8 @@ def es_search(query, branch, ops_type, limit):
                                  }
                              }
                          }
-                     }
+                     },
+                     "size": limit
                  }
     return elasticsearch().search(index=branch, body = search)
 
