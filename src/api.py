@@ -11,6 +11,7 @@ import json
 from rdflib import Graph, plugin
 import mimerender
 import cgi
+import urllib
 
 mimerender.register_mime("turtle", ("text/turtle","text/n3"))
 mimerender.register_mime("rdfxml", ("application/rdf+xml", "application/xml"))
@@ -19,6 +20,9 @@ mimerender.register_mime("nt", ("application/n-triples",))
 produces = mimerender.BottleMimeRender()
 
 conf = {}
+uri_list = {}
+all_uri_list = []
+map_uri_url = None
 
 def find_static():
     cwd = None
@@ -37,13 +41,11 @@ def elasticsearch():
     if es is not None:
         return es
     es_hosts = conf.get("elasticsearch")
-    print(es_hosts)
     es = Elasticsearch(es_hosts)
     return es
 
 def es_search(query, branch, ops_type, limit):
     if ops_type is None:
-        print("no ops_type")
         search = {
                      "query": {
                          "query_string": {
@@ -54,7 +56,6 @@ def es_search(query, branch, ops_type, limit):
                      "size": limit,
                  }
     else:
-        print("ops_type")
         search = {
                      "query" : {
                          "filtered" : { 
@@ -73,6 +74,7 @@ def es_search(query, branch, ops_type, limit):
                      },
                      "size": limit
                  }
+    #TODO use IMS to remove duplicates
     return elasticsearch().search(index=branch, body = search)
 
 @get("/")
@@ -125,12 +127,12 @@ def search_json(query=None):
     if ops_type == "":
         ops_type = None
     search = es_search(query, branch, ops_type, limit)
+    check_map_uris(search["hits"]["hits"])
     json["total"] = search["hits"]["total"]
     for hit in search["hits"]["hits"]:
         source = hit["_source"]
         score = hit["_score"]
         ops_type = hit["_type"]
-        source["@score"] = score
         source["@ops_type"] = ops_type
         hits.append(source)
     return json
@@ -165,10 +167,32 @@ def search_json_post(query=None):
         hits.append(source)
     return json
 
+def check_map_uris(hits):
+    for hit in hits:
+      if not check_for_uri(hit["_id"]):
+      # grab all the mapped uris for this one
+        map_uris(hit["_id"])
+
+def map_uris(uri):
+    params = urllib.parse.urlencode({'Url': uri})
+    req_url = map_uri_url + "?%s" %params
+    req = map_uri_response = urllib.request.Request(req_url)
+    req.add_header('Accept', 'application/json')
+    resp = urllib.request.urlopen(req)
+    return True
+
+def check_for_uri(uri):
+    if uri in all_uri_list:
+      return True
+    else:
+      return False
+
 def main(config_file, port="8839", *args):
     global conf
+    global map_uri_url
     with open(config_file) as f:
         conf = yaml.load(f)
+        map_uri_url = conf.get("map_uri_url")
     run(host='localhost', port=int(port), reloader=True)
 
 if __name__ == "__main__":

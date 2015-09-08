@@ -1,9 +1,13 @@
+map_uri_url: "wherever the mapUri URL is without any params eg http://example.com/mapUrl"
 
 elasticsearch:
   - host: 192.168.59.103
     port: 9200
 #  - host: docker
 #    port: 9200
+
+ims:
+  uri: http://example.com:8080/ims
 
 prefixes:
   rdfs: http://www.w3.org/2000/01/rdf-schema#
