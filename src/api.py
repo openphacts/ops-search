@@ -20,7 +20,7 @@ mimerender.register_mime("nt", ("application/n-triples",))
 produces = mimerender.BottleMimeRender()
 
 conf = {}
-uri_list = {}
+uri_map = {}
 all_uri_list = []
 map_uri_url = None
 
@@ -169,16 +169,25 @@ def search_json_post(query=None):
 
 def check_map_uris(hits):
     for hit in hits:
+      print('checking ' + hit["_id"])
       if not check_for_uri(hit["_id"]):
+        print('mapping ' + hit["_id"])
       # grab all the mapped uris for this one
         map_uris(hit["_id"])
 
 def map_uris(uri):
-    params = urllib.parse.urlencode({'Url': uri})
+    params = urllib.parse.urlencode({'Uri': uri})
     req_url = map_uri_url + "?%s" %params
-    req = map_uri_response = urllib.request.Request(req_url)
+    print('request url: ' + req_url)
+    req = urllib.request.Request(req_url)
     req.add_header('Accept', 'application/json')
     resp = urllib.request.urlopen(req)
+    JSON_response = json.loads(resp.read().decode())
+    uri_map["uri"] = []
+    for mapped_uri in JSON_response["Mapping"]["targetUri"]:
+        #print(uri)
+        all_uri_list.append(mapped_uri)
+        uri_map["uri"].append(mapped_uri)
     return True
 
 def check_for_uri(uri):
