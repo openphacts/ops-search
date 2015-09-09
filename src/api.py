@@ -149,6 +149,8 @@ def search_json(query=None):
     nt = lambda **doc: render_rdf(doc, "nt")
 )
 def search_json_post(query=None):
+    # keep track of what results are in the json response
+    already_added_uris = []
     query = request.json["query"]["query_string"]["query"]
     id = quote(url("/search/<query>", query=query))
     response.set_header("Content-Location", id)
@@ -159,13 +161,22 @@ def search_json_post(query=None):
     search = es_search(query)
     json["total"] = search["hits"]["total"]
     for hit in search["hits"]["hits"]:
+      if not hit["_id"] in already_added_uris:
         source = hit["_source"]
         score = hit["_score"]
         ops_type = hit["_type"]
         source["@score"] = score
         source["@ops_type"] = ops_type
         hits.append(source)
+        add_mapped_uris_for_uri(already_added_uris, hit["_id"])
+      else:
+        # we have already added data for something this maps to
+	# so grab the metadata and add it to that record
+        add_to_existing_record(hits)
     return json
+
+def add_to_existing_record(hits, hit):
+    return True
 
 def check_map_uris(hits):
     for hit in hits:
@@ -188,13 +199,26 @@ def map_uris(uri):
         #print(uri)
         all_uri_list.append(mapped_uri)
         uri_map["uri"].append(mapped_uri)
-    return True
 
 def check_for_uri(uri):
     if uri in all_uri_list:
       return True
     else:
       return False
+
+def add_mapped_uris_for_uri(already_added_uris, uri):
+    #find the map that the uri is in and add them all to this array
+    if uri in uri_map.keys():
+      # add the source uri
+      already_added_uris.append[uri]
+      # add all the uris that it is mapped to
+      already_added_uris.extend(uri_map[uri])
+    else:
+      # find what map the uri is in and add them all
+      for key in uri_map.keys():
+        if uri in uri_map[key]:
+          already_added_uris.extend(uri_map[key])
+          already_added_uris.append(key)
 
 def main(config_file, port="8839", *args):
     global conf
