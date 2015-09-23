@@ -21,7 +21,7 @@ produces = mimerender.BottleMimeRender()
 
 conf = {}
 uri_map = {}
-all_uri_list = []
+#all_uri_list = []
 map_uri_url = None
 
 def find_static():
@@ -110,6 +110,7 @@ def html_pre(json):
     nt = lambda **doc: render_rdf(doc, "nt")
 )
 def search_json(query=None):
+    already_added_uris = []
     if query is None:
         # Get from ?q parameter instead, if exist
         query = request.query.q
@@ -127,14 +128,20 @@ def search_json(query=None):
     if ops_type == "":
         ops_type = None
     search = es_search(query, branch, ops_type, limit)
-    check_map_uris(search["hits"]["hits"])
     json["total"] = search["hits"]["total"]
     for hit in search["hits"]["hits"]:
-        source = hit["_source"]
-        score = hit["_score"]
-        ops_type = hit["_type"]
-        source["@ops_type"] = ops_type
-        hits.append(source)
+        # fetch the equivalent uris for this one
+        check_map_uri(hit["_id"])
+        # is this hot equaivalent to another one found in this search
+        for uri in already_added_uris:
+          if hit["_id"] in uri_map[uri]:
+            # add the data for this one to the existing record
+            source = hit["_source"]
+            score = hit["_score"]
+            ops_type = hit["_type"]
+            source["@ops_type"] = ops_type
+            hits.append(source)
+        already_added_uris.append(hit)
     return json
 
 @post("/search")
@@ -178,13 +185,12 @@ def search_json_post(query=None):
 def add_to_existing_record(hits, hit):
     return True
 
-def check_map_uris(hits):
-    for hit in hits:
-      print('checking ' + hit["_id"])
-      if not check_for_uri(hit["_id"]):
-        print('mapping ' + hit["_id"])
+def check_map_uris(hit):
+    # if we don't have the equivalent uris for this one then downloed them
+    if not hit in uri_map:
+      print('mapping ' + hit["_id"])
       # grab all the mapped uris for this one
-        map_uris(hit["_id"])
+      map_uris(hit)
 
 def map_uris(uri):
     params = urllib.parse.urlencode({'Uri': uri})
@@ -195,30 +201,11 @@ def map_uris(uri):
     resp = urllib.request.urlopen(req)
     JSON_response = json.loads(resp.read().decode())
     uri_map["uri"] = []
+    #all_uri_list.append(uri)
     for mapped_uri in JSON_response["Mapping"]["targetUri"]:
         #print(uri)
-        all_uri_list.append(mapped_uri)
+        #all_uri_list.append(mapped_uri)
         uri_map["uri"].append(mapped_uri)
-
-def check_for_uri(uri):
-    if uri in all_uri_list:
-      return True
-    else:
-      return False
-
-def add_mapped_uris_for_uri(already_added_uris, uri):
-    #find the map that the uri is in and add them all to this array
-    if uri in uri_map.keys():
-      # add the source uri
-      already_added_uris.append[uri]
-      # add all the uris that it is mapped to
-      already_added_uris.extend(uri_map[uri])
-    else:
-      # find what map the uri is in and add them all
-      for key in uri_map.keys():
-        if uri in uri_map[key]:
-          already_added_uris.extend(uri_map[key])
-          already_added_uris.append(key)
 
 def main(config_file, port="8839", *args):
     global conf
