@@ -148,13 +148,22 @@ def search_json(query=None):
 )
 def search_json_post(query=None):
     query = request.json["query"]["query_string"]["query"]
+    limit = request.json["limit"]
+    branch = request.json["branch"]
+    ops_type = request.json["type"]
     id = quote(url("/search/<query>", query=query))
     response.set_header("Content-Location", id)
     # CORS header
     response.set_header("Access-Control-Allow-Origin", "*")
     json = { "@context": {"@vocab": "http://example.com/"}, "@id": id, "query": query, "hits": [] }
     hits = json["hits"]
-    search = es_search(query)
+    if limit == "":
+        limit = "25"
+    if ops_type == "":
+        ops_type = None
+    if branch == "":
+      branch = None
+    search = es_search(query, branch, ops_type, limit)
     json["total"] = search["hits"]["total"]
     for hit in search["hits"]["hits"]:
         source = hit["_source"]

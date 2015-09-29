@@ -172,7 +172,10 @@ function search(query) {
   $("#resultlist").empty();
   $("#stats").empty();
 
-  var search = { 
+  var search = {
+	        limit: "",
+		branch: "",
+		type: "",
                 query: { 
                   query_string: { 
                       query: query,
