@@ -171,7 +171,6 @@ function search(query) {
 
   $("#resultlist").empty();
   $("#stats").empty();
-
   var search = {
 	        limit: "",
 		branch: "",
@@ -207,7 +206,6 @@ function search(query) {
               };
 
 // TODO: Use http://www.elasticsearch.org/blog/client-for-node-js-and-the-browser/ instad
-
 //$.getJSON('search?default_operator=AND&q=' + ( $("#q").val() || "histamine"), function(data) {
   $.ajax({ type: "POST",
                url: "search",

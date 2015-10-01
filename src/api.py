@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import bottle
 from bottle import route, run, Bottle, get, post, request, response, static_file, url
 from urllib.parse import quote
 import os.path
@@ -11,6 +12,8 @@ import json
 from rdflib import Graph, plugin
 import mimerender
 import cgi
+import html
+import re
 
 mimerender.register_mime("turtle", ("text/turtle","text/n3"))
 mimerender.register_mime("rdfxml", ("application/rdf+xml", "application/xml"))
@@ -42,6 +45,9 @@ def elasticsearch():
     return es
 
 def es_search(query, branch, ops_type, limit):
+    query = html.escape(query)
+    query = re.escape(query)
+    print("escaped query :" + query)
     if ops_type is None:
         print("no ops_type")
         search = {
@@ -182,3 +188,5 @@ def main(config_file, port="8839", *args):
 
 if __name__ == "__main__":
    main(*sys.argv[1:])
+
+application = bottle.default_app()
