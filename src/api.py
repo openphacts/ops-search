@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import bottle
-from bottle import route, run, Bottle, get, post, request, response, static_file, url
+from bottle import hook, route, run, Bottle, get, post, request, response, static_file, url
 from urllib.parse import quote
 import os.path
 from elasticsearch import Elasticsearch
@@ -80,6 +80,10 @@ def es_search(query, branch, ops_type, limit):
                      "size": limit
                  }
     return elasticsearch().search(index=branch, body = search)
+
+@hook('after_request')
+def enable_cors():
+    response.headers['Access-Control-Allow-Origin'] = '*'
 
 @get("/")
 def index():
