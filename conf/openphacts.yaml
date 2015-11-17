@@ -121,27 +121,35 @@ indexes:
           jsonld: allergen
   drugbank:
     compound:
-      graph: http://linkedlifedata.com/resource/drugbank
-      type: drugbank:drugs
+      graph: http://www.openphacts.org/bio2rdf/drugbank
+      type: drugbank:Drug
       properties:
-        - drugbank:brandName
-        - drugbank:genericName
-        - drugbank:chemicalIupacName
-        - drugbank:synonym
-        - drugbank:swissprotName
-    target:
-      graph: http://linkedlifedata.com/resource/drugbank
-      type: drugbank:targets
-      properties:
-        - drugbank:geneName
-        - drugbank:synonym
-        - drugbank:swissprotName
-    enzyme:
-      graph: http://linkedlifedata.com/resource/drugbank
-      type: drugbank:enzymes
-      properties:
-        - drugbank:geneName
-        - drugbank:name
+        - dc:title #label
+        - drugbank:synonym/dct:title #synonym
+        - drugbank:brand/dct:title #brand name
+      #  drugbank:
+      #compound:
+      #graph: http://linkedlifedata.com/resource/drugbank
+      #type: drugbank:drugs
+      #properties:
+      # - drugbank:brandName
+      #  - drugbank:genericName
+      # - drugbank:chemicalIupacName
+      # - drugbank:synonym
+      # - drugbank:swissprotName
+      #target:
+      #graph: http://linkedlifedata.com/resource/drugbank
+      #type: drugbank:targets
+      #properties:
+      #  - drugbank:geneName
+      #  - drugbank:synonym
+      #  - drugbank:swissprotName
+      #enzyme:
+      #graph: http://linkedlifedata.com/resource/drugbank
+      #type: drugbank:enzymes
+      #properties:
+      #  - drugbank:geneName
+      #  - drugbank:name
   chebi:
     compound:
       graph: http://www.ebi.ac.uk/chebi
