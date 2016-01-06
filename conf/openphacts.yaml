@@ -14,7 +14,7 @@ prefixes:
   chembl: http://rdf.ebi.ac.uk/terms/chembl#
   cheminf: http://semanticscience.org/resource/
   uniprot: http://purl.uniprot.org/core/
-  drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/
+  drugbank: "http://bio2rdf.org/drugbank_vocabulary:"
   obohash: http://purl.obolibrary.org/obo#
   oboslash: http://purl.obolibrary.org/obo/
 
@@ -124,26 +124,24 @@ indexes:
       graph: http://www.openphacts.org/bio2rdf/drugbank
       type: drugbank:Drug
       properties:
-        - dc:title #label
-        - drugbank:synonym/dct:title #synonym
-        - drugbank:brand/dct:title #brand name
-      #  drugbank:
-      #compound:
-      #graph: http://linkedlifedata.com/resource/drugbank
-      #type: drugbank:drugs
-      #properties:
-      # - drugbank:brandName
-      #  - drugbank:genericName
-      # - drugbank:chemicalIupacName
-      # - drugbank:synonym
-      # - drugbank:swissprotName
-      #target:
-      #graph: http://linkedlifedata.com/resource/drugbank
-      #type: drugbank:targets
-      #properties:
-      #  - drugbank:geneName
-      #  - drugbank:synonym
-      #  - drugbank:swissprotName
+        - dct:title #label
+        - sparql: drugbank:synonym/dct:title
+          variable: synonym
+          jsonld: synonym
+        - sparql: drugbank:brand/dct:title
+          variable: brand_name
+          jsonld: brand_name
+    target:
+      graph: http://www.openphacts.org/bio2rdf/drugbank
+      type: drugbank:Target
+      properties:
+        - dct:title #label
+        - drugbank:name
+        - drugbank:synonym
+        - sparql: drugbank:gene-name
+          variable: gene_name
+          jsonld: gene_name
+
       #enzyme:
       #graph: http://linkedlifedata.com/resource/drugbank
       #type: drugbank:enzymes
@@ -163,7 +161,7 @@ indexes:
         - obohash:xref
         - obohash:Definition
 
-  
+
 
 ## what about these?
 # graph: http://rdf.imim.es
