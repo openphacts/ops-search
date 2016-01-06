@@ -7,4 +7,4 @@ ADD src /ops-search
 ADD conf/openphacts.yaml /ops-search/config.yaml
 WORKDIR /ops-search
 EXPOSE 8839
-CMD ["api.py", "config.yaml", "8839"]
+CMD ["/ops-search/api.py", "config.yaml", "8839"]
