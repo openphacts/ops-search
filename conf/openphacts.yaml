@@ -141,6 +141,17 @@ indexes:
         - sparql: drugbank:gene-name
           variable: gene_name
           jsonld: gene_name
+    enzyme:
+      graph: http://www.openphacts.org/bio2rdf/drugbank
+      type: drugbank:Enzyme
+      properties:
+        - dct:title #label
+        - drugbank:name
+        - drugbank:synonym
+        - sparql: drugbank:gene-name
+          variable: gene_name
+          jsonld: gene_name
+
 
       #enzyme:
       #graph: http://linkedlifedata.com/resource/drugbank
