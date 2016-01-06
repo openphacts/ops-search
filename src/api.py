@@ -45,9 +45,6 @@ def elasticsearch():
     return es
 
 def es_search(query, branch, ops_type, limit):
-    query = html.escape(query)
-    query = re.escape(query)
-    print("escaped query :" + query)
     if ops_type is None:
         print("no ops_type")
         search = {
@@ -63,15 +60,15 @@ def es_search(query, branch, ops_type, limit):
         print("ops_type")
         search = {
                      "query" : {
-                         "filtered" : { 
+                         "filtered" : {
                              "query" : {
                                  "query_string" : {
                                      "query": query,
 		                     "default_operator": "AND"
-                                 } 
+                                 }
                              },
                              "filter" : {
-                                 "type" : { 
+                                 "type" : {
                                      "value": ops_type
                                  }
                              }
@@ -134,6 +131,7 @@ def search_json(query=None):
         limit = "25"
     if ops_type == "":
         ops_type = None
+    #print("Query:", query)
     search = es_search(query, branch, ops_type, limit)
     json["total"] = search["hits"]["total"]
     for hit in search["hits"]["hits"]:
