@@ -37,7 +37,7 @@ class SlidingWindowDictionary(collections.OrderedDict):
         super().__setitem__(key, value)
 
 def negate(f):
-    return lambda *args,**kwargs: not f(*args, **kwargs) 
+    return lambda *args,**kwargs: not f(*args, **kwargs)
 
 def is_property_required(prop):
     is_required = bool(prop.get("required", False))
@@ -119,7 +119,7 @@ class Session:
         # Check that every index+type have at least one
         # required triple (rdf:type or a property)
 
-        for p in self.conf["common_properties"]:
+        for p in self.conf.get("common_properties", []):
             if type(p) != str and is_property_required(p):
                 return # Great! required for every index
 
@@ -146,7 +146,7 @@ class Session:
                     urlparse(self.expand_qname(type_conf["type"]))
                 for p in type_conf.get("properties", []):
                     self.check_property(p)
-                    
+
 
 
 
