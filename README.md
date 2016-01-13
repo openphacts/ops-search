@@ -55,6 +55,10 @@ _Note: On OSX & Windows you may need to find the actual IP address that [boot2do
 To populate elastic search using the [configuration](#Configuration) in [example.yaml](conf/example.yaml), do:
 
     python3 src/load.py conf/example.yaml
+    
+If you want to test the SPARQL queries without populating the elastic search indexes then add the `dryrun` flag and this will show you all the queries without executing them.
+
+    python src/load.py conf/example.yaml -d
 
 To run the server for the API, using the same configuration, do:
   
