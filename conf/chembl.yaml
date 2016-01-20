@@ -1,6 +1,5 @@
-
 elasticsearch:
-  - host: localhost
+  - host: 0.0.0.0
     port: 9200
 #  - host: docker
 #    port: 9200
@@ -14,7 +13,7 @@ prefixes:
   chembl: http://rdf.ebi.ac.uk/terms/chembl#
   cheminf: http://semanticscience.org/resource/
   uniprot: http://purl.uniprot.org/core/
-  drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/
+  drugbank: "http://bio2rdf.org/drugbank_vocabulary:"
   obohash: http://purl.obolibrary.org/obo#
   oboslash: http://purl.obolibrary.org/obo/
 
@@ -22,9 +21,10 @@ prefixes:
 
 sparql:
   #uri: http://sparql:8890/sparql
-  uri: http://localhost:3030/chembl/sparql
+  #uri: http://ops2.few.vu.nl:3030/chembl19/sparql
   #uri: http://ops2.few.vu.nl:8890/sparql
-  timeout_s: 7200 # e.g. 2 hours
+  uri: http://heater.cs.man.ac.uk:3003/sparql
+  timeout_s: 14400 # e.g. 2 hours
 
 common_properties:
   - rdfs:label
@@ -66,4 +66,3 @@ indexes:
           - sparql: chembl:organismName
             variable: organism
             jsonld: organism
-  

@@ -1,0 +1,68 @@
+elasticsearch:
+  - host: 0.0.0.0
+    port: 9200
+#  - host: docker
+#    port: 9200
+
+prefixes:
+  rdfs: http://www.w3.org/2000/01/rdf-schema#
+  owl: http://www.w3.org/2002/07/owl#
+  dct: http://purl.org/dc/terms/
+  dc: http://purl.org/dc/elements/1.1/
+  skos: http://www.w3.org/2004/02/skos/core#
+  chembl: http://rdf.ebi.ac.uk/terms/chembl#
+  cheminf: http://semanticscience.org/resource/
+  uniprot: http://purl.uniprot.org/core/
+  drugbank: "http://bio2rdf.org/drugbank_vocabulary:"
+  obohash: http://purl.obolibrary.org/obo#
+  oboslash: http://purl.obolibrary.org/obo/
+
+
+
+sparql:
+  #uri: http://sparql:8890/sparql
+  #uri: http://ops2.few.vu.nl:3030/chembl19/sparql
+  #uri: http://ops2.few.vu.nl:8890/sparql
+  uri: http://heater.cs.man.ac.uk:3003/sparql
+  timeout_s: 14400 # e.g. 2 hours
+
+common_properties:
+  - rdfs:label
+
+indexes:
+  uniprot:
+    target:
+      graph: http://purl.uniprot.org
+      type: uniprot:Protein
+      properties:
+        - uniprot:mnemonic
+        - uniprot:oldMnemonic
+      # FIXME: how would jsonld names get into the @context?
+        - sparql: uniprot:recommendedName/uniprot:fullName
+          variable: fullName
+          jsonld: fullName
+        - sparql: uniprot:recommendedName/uniprot:shortName
+          variable: shortName
+          jsonld: shortName
+        - sparql: uniprot:recommendedName/uniprot:ecName
+          variable: ecName
+          jsonld: ecName
+        - sparql: uniprot:alternativeName/uniprot:fullName
+          variable: altFullName
+          jsonld: altFullName
+        - sparql: uniprot:alternativeName/uniprot:shortName
+          variable: altShortName
+          jsonld: altShortName
+        - sparql: uniprot:alternativeName/uniprot:ecName
+          variable: altEcName
+          jsonld: altEcName
+        - sparql: uniprot:alternativeName/uniprot:internationalNonproprietaryName
+          variable: internationalNonpropriatoryName
+          jsonld: internationalNonpropriatoryName
+        - sparql: uniprot:alternativeName/uniprot:cdAntigenName
+          variable: antigen
+          jsonld: antigen
+        - sparql: uniprot:alternativeName/uniprot:allergenName
+          variable: allergen
+          jsonld: allergen
+
