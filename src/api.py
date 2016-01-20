@@ -40,31 +40,28 @@ def elasticsearch():
     if es is not None:
         return es
     es_hosts = conf.get("elasticsearch")
-    print(es_hosts)
     es = Elasticsearch(es_hosts)
     return es
 
 def es_search(query, branch, ops_type, limit):
     if ops_type is None:
-        print("no ops_type")
         search = {
-                     "query": {
-                         "query_string": {
-                             "query": query,
-                             "default_operator": "AND"
-                         },
-                     },
-                     "size": limit,
-                 }
+            "query": {
+              "multi_match": {
+                "query":    query,
+                "fields": [ "label^2", "prefLabel^2", "description", "altLabel", "Synonym", "Definition" ]
+              }
+            },
+            "size": limit
+        }
     else:
-        print("ops_type")
         search = {
                      "query" : {
                          "filtered" : {
                              "query" : {
-                                 "query_string" : {
+                                 "multi_match" : {
                                      "query": query,
-		                     "default_operator": "AND"
+                                     "fields": [ "label^2", "prefLabel^2", "description", "altLabel", "Synonym", "Definition" ]
                                  }
                              },
                              "filter" : {
@@ -131,7 +128,6 @@ def search_json(query=None):
         limit = "25"
     if ops_type == "":
         ops_type = None
-    #print("Query:", query)
     search = es_search(query, branch, ops_type, limit)
     json["total"] = search["hits"]["total"]
     for hit in search["hits"]["hits"]:
