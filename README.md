@@ -13,7 +13,7 @@ content negotiation for JSON, JSON-LD, Turtle, RDF/XML etc.
 ## License
 License: [MIT license](http://opensource.org/licenses/MIT)
 
-(c) 2014-2015 University of Manchester, UK
+(c) 2014-2016 University of Manchester, UK
 
 See [LICENSE](LICENSE) for details.
 
