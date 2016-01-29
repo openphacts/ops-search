@@ -49,7 +49,8 @@ def es_search(query, branch, ops_type, limit):
             "query": {
               "multi_match": {
                 "query":    query,
-                "fields": [ "label^2", "prefLabel^2", "description", "altLabel", "Synonym", "Definition" ]
+                "fields": [ "label^2", "prefLabel^2", "description", "altLabel", "Synonym", "Definition" ],
+		"fuzziness": 1
               }
             },
             "size": limit
@@ -61,7 +62,8 @@ def es_search(query, branch, ops_type, limit):
                              "query" : {
                                  "multi_match" : {
                                      "query": query,
-                                     "fields": [ "label^2", "prefLabel^2", "description", "altLabel", "Synonym", "Definition" ]
+                                     "fields": [ "label^2", "prefLabel^2", "description", "altLabel", "Synonym", "Definition" ],
+				     "fuzziness": 1
                                  }
                              },
                              "filter" : {
