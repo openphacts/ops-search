@@ -184,7 +184,9 @@ def main(config_file, port="8839", *args):
     global conf
     with open(config_file) as f:
         conf = yaml.load(f)
-    run(host='localhost', port=int(port), reloader=True)
+    ws_host = conf["webservice"]["host"]
+    ws_port = conf["webservice"]["port"]
+    run(host=ws_host, port=int(ws_port), reloader=True)
 
 if __name__ == "__main__":
    main(*sys.argv[1:])

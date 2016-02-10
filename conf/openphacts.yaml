@@ -5,6 +5,13 @@ elasticsearch:
 #  - host: docker
 #    port: 9200
 
+webservice:
+  host: 'localhost'
+  port: 8983
+
+ims:
+  uri: http://example.com:8080/ims
+
 prefixes:
   rdfs: http://www.w3.org/2000/01/rdf-schema#
   owl: http://www.w3.org/2002/07/owl#
@@ -14,7 +21,7 @@ prefixes:
   chembl: http://rdf.ebi.ac.uk/terms/chembl#
   cheminf: http://semanticscience.org/resource/
   uniprot: http://purl.uniprot.org/core/
-  drugbank: "http://bio2rdf.org/drugbank_vocabulary:"
+  drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/
   obohash: http://purl.obolibrary.org/obo#
   oboslash: http://purl.obolibrary.org/obo/
 
@@ -121,44 +128,27 @@ indexes:
           jsonld: allergen
   drugbank:
     compound:
-      graph: http://www.openphacts.org/bio2rdf/drugbank
-      type: drugbank:Drug
+      graph: http://linkedlifedata.com/resource/drugbank
+      type: drugbank:drugs
       properties:
-        - dct:title #label
-        - sparql: drugbank:synonym/dct:title
-          variable: synonym
-          jsonld: synonym
-        - sparql: drugbank:brand/dct:title
-          variable: brand_name
-          jsonld: brand_name
+        - drugbank:brandName
+        - drugbank:genericName
+        - drugbank:chemicalIupacName
+        - drugbank:synonym
+        - drugbank:swissprotName
     target:
-      graph: http://www.openphacts.org/bio2rdf/drugbank
-      type: drugbank:Target
+      graph: http://linkedlifedata.com/resource/drugbank
+      type: drugbank:targets
       properties:
-        - dct:title #label
-        - drugbank:name
+        - drugbank:geneName
         - drugbank:synonym
-        - sparql: drugbank:gene-name
-          variable: gene_name
-          jsonld: gene_name
+        - drugbank:swissprotName
     enzyme:
-      graph: http://www.openphacts.org/bio2rdf/drugbank
-      type: drugbank:Enzyme
+      graph: http://linkedlifedata.com/resource/drugbank
+      type: drugbank:enzymes
       properties:
-        - dct:title #label
+        - drugbank:geneName
         - drugbank:name
-        - drugbank:synonym
-        - sparql: drugbank:gene-name
-          variable: gene_name
-          jsonld: gene_name
-
-
-      #enzyme:
-      #graph: http://linkedlifedata.com/resource/drugbank
-      #type: drugbank:enzymes
-      #properties:
-      #  - drugbank:geneName
-      #  - drugbank:name
   chebi:
     compound:
       graph: http://www.ebi.ac.uk/chebi
@@ -172,7 +162,7 @@ indexes:
         - obohash:xref
         - obohash:Definition
 
-
+  
 
 ## what about these?
 # graph: http://rdf.imim.es

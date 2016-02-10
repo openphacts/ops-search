@@ -3,6 +3,10 @@ elasticsearch:
   - host: 192.168.59.103
     port: 9200
 
+webservice:
+  host: 'localhost'
+  port: 8839
+
 prefixes:
   rdfs: http://www.w3.org/2000/01/rdf-schema#
   owl: http://www.w3.org/2002/07/owl#

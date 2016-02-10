@@ -70,6 +70,8 @@ To run the server for the API, using the same configuration, do:
 You need to create a config file similar to
 [example.yaml](conf/example.yaml) to configure the ElasticSearch data loading.
 
+To allow external access to the API you may need to change the webservice host setting in your version of the config file to eg '0.0.0.0'. You can also change the port where it is accessed. Note that we recommend that in production you run the API in a WSGI compatible webserver.
+
 A description of each element of the configuration follows below:
 
 ### ElasticSearch
@@ -91,6 +93,14 @@ Multiple hosts can be given to address the cluster:
         - host: server2
           port: 9201
         - host: server3
+```
+
+The address where the webservice is available can be altered:
+
+```yaml
+    webservice:
+        host: 'localhost'
+        port: 8839
 ```
 
 [Additional parameters](http://elasticsearch-py.readthedocs.org/en/master/api.html#elasticsearch) like `use_ssl` may be provided as supported by the ElasticSearch Python library.
@@ -274,6 +284,10 @@ conflicting name (e.g. `dc:title` `dct:title` would be indexed as `title` and
 If a `type` was specified (match by type), then in the the generated query the
 properties are individually made `OPTIONAL`, if not, all the specified
 properties must be present in the graph (match by pattern).
+
+## API defaults
+
+The API has a fuzziness setting of 1 to allow for simple mispellings of eg Aspirin to Asprin. The `label` field has also been boosted by 2 which means that it takes precedence over other fields.
 
 ## Request and Response
 
