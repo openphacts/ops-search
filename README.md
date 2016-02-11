@@ -64,6 +64,12 @@ To run the server for the API, using the same configuration, do:
   
     python3 src/api.py conf/example.yaml
 
+### Updating and backing up the docker images
+
+If the [Open PHACTS Elastic Search image](https://hub.docker.com/r/openphacts/ops-search-elasticsearch/) has been updated then you can update and transfer the data to the latest version.  
+First pull the latest version from the docker hub with `docker pull openphacts/ops-search-elasticsearch`. To use the data from the previous version you can mount the volume in the latest image, try 
+`docker run --name elasticsearch --volumes-from elasticsearch_old -d -p 9200:9200 openphacts/ops-search-elasticsearch`. Where `elasticsearch_old` is the name for the older version (you will probably have called it something else) and `elasticsearch` is the docker container we want to run. You can rename docker images using `docker rename elasticsearch elasticsearch_old` which would rename the `elasticsearch` image to `elasticsearch_old`.
+To backup the data for the elasticsearch image try `docker run --rm --volumes-from elasticsearch_old -v $(pwd):/backup ubuntu tar cvf /backup/backup.tar /usr/share/elasticsearch/data`. This would backup the data volume `/usr/share/elasticsearch/data` from the `elasticsearch_old` image to the local file `backup.tar`.
 
 ## Configuration
 
