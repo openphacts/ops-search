@@ -1,6 +1,6 @@
 
 elasticsearch:
-  - host: 192.168.59.103
+  - host: localhost
     port: 9200
 
 webservice:
