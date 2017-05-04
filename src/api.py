@@ -45,37 +45,18 @@ def elasticsearch():
 
 def es_search(query, branch, ops_type, limit):
     if ops_type is None:
-        search = {
-            "query": {
-              "multi_match": {
-                "query":    query,
-                "fields": [ "label^2", "prefLabel^2", "description", "altLabel", "Synonym", "Definition" ],
-		"fuzziness": 1
-              }
-            },
-            "size": limit
+        ops_type = "_all"
+    search = {
+        "query": {
+          "multi_match": {
+            "query":    query,
+            "fields": [ "label^2", "prefLabel^2", "description", "altLabel", "Synonym", "Definition" ],
+            "fuzziness": 1
         }
-    else:
-        search = {
-                     "query" : {
-                         "filtered" : {
-                             "query" : {
-                                 "multi_match" : {
-                                     "query": query,
-                                     "fields": [ "label^2", "prefLabel^2", "description", "altLabel", "Synonym", "Definition" ],
-				     "fuzziness": 1
-                                 }
-                             },
-                             "filter" : {
-                                 "type" : {
-                                     "value": ops_type
-                                 }
-                             }
-                         }
-                     },
-                     "size": limit
-                 }
-    return elasticsearch().search(index=branch, body = search)
+      },
+      "size": limit
+    }
+    return elasticsearch().search(index=branch, doc_type=ops_type, body = search)
 
 @hook('after_request')
 def enable_cors():
