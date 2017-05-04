@@ -20,9 +20,7 @@ prefixes:
 
 
 sparql:
-  #uri: http://sparql:8890/sparql
-  #uri: http://ops2.few.vu.nl:3030/chembl19/sparql
-  uri: http://ops2.few.vu.nl:8890/sparql
+  uri: #Add sparql endpoint here
   timeout_s: 7200 # e.g. 2 hours
 
 common_properties:
@@ -34,22 +32,9 @@ indexes:
       graph: http://www.ebi.ac.uk/chebi
       type: owl:Class 
       properties:
-        - rdfs:description
-        - dc:title
-        - dc:description
+#        - rdfs:description
+#        - dc:title
+#        - dc:description
         - obohash:Synonym
         - obohash:xref
         - obohash:Definition
-  
-
-## what about these?
-# graph: http://rdf.imim.es
-# graph: http://linkedct.org
-# graph: http://aers.data2semantics.org/
-# graph: http://www.nextprot.org
-# graph: http://www.ebi.ac.uk/chebi
-# graph: http://www.geneontology.org
-# graph: http://purl.uniprot.org/enzyme
-# graph: http://www.openphacts.org/api/datasetDescriptors
-# graph: http://www.geneontology.org/terms
-# graph: http://www.wikipathways.org#
