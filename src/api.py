@@ -93,10 +93,10 @@ def html_pre(json):
 def search_json(query=None):
     if query is None:
         # Get from ?q parameter instead, if exist
-        query = request.query.q
-        branch = request.query.b
-        limit = request.query.l
-        ops_type = request.query.t
+        query = request.query.query
+        branch = request.query.branch
+        limit = request.query.limit
+        ops_type = request.query.type
     id = quote(url("/search/<query>", query=query))
     response.set_header("Content-Location", id)
     # CORS header
@@ -114,6 +114,7 @@ def search_json(query=None):
         search["branch"] = "_all"
     else:
        search["branch"] = branch
+    search.pop("_shards", None)
     return search
 
 @post("/search")
@@ -128,32 +129,27 @@ def search_json(query=None):
     nt = lambda **doc: render_rdf(doc, "nt")
 )
 def search_json_post(query=None):
-    query = request.json["query"]["query_string"]["query"]
-    limit = request.json["limit"]
-    branch = request.json["branch"]
-    ops_type = request.json["type"]
-    id = quote(url("/search/<query>", query=query))
+    postdata = request.body.read()
+    query = request.forms.get("query")
+    limit = request.forms.get("limit")
+    branch = request.forms.get("branch")
+    ops_type = request.forms.get("type")
+
     response.set_header("Content-Location", id)
     # CORS header
     response.set_header("Access-Control-Allow-Origin", "*")
-    json = { "@context": {"@vocab": "http://example.com/"}, "@id": id, "query": query, "hits": [] }
-    hits = json["hits"]
-    if limit == "":
-        limit = 25
-    if ops_type == "":
-        ops_type = "_all"
-    if branch == "":
-      branch = None
+    if limit == None:
+        limit = "25"
     search = es_search(query, branch, ops_type, limit)
-    json["total"] = search["hits"]["total"]
-    for hit in search["hits"]["hits"]:
-        source = hit["_source"]
-        score = hit["_score"]
-        ops_type = hit["_type"]
-        source["@score"] = score
-        source["@ops_type"] = ops_type
-        hits.append(source)
-    return json
+    if ops_type == "":
+        search["ops_type"] = "_all"
+    else:
+        search["ops_type"] = ops_type
+    if branch == "":
+        search["branch"] = "_all"
+    else:
+       search["branch"] = branch
+    return search
 
 def main(config_file, port="8839", *args):
     global conf
