@@ -20,10 +20,7 @@ prefixes:
 
 
 sparql:
-  #uri: http://sparql:8890/sparql
-  #uri: http://ops2.few.vu.nl:3030/chembl19/sparql
-  #uri: http://ops2.few.vu.nl:8890/sparql
-  uri: http://heater.cs.man.ac.uk:3003/sparql
+  uri: #sparql endpoint URI
   timeout_s: 14400 # e.g. 2 hours
 
 common_properties:
@@ -39,10 +36,9 @@ indexes:
         - sparql: drugbank:synonym/dct:title
           variable: synonym
           jsonld: synonym
-# the brand causes issues with virtuoso
-#        - sparql: drugbank:brand/dct:title
-#          variable: brand_name
-#          jsonld: brand_name
+        - sparql: drugbank:brand/dct:title
+          variable: brand_name
+          jsonld: brand_name
     target:
       graph: http://www.openphacts.org/bio2rdf/drugbank
       type: drugbank:Target
