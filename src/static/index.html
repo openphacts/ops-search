@@ -1,286 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">      
 
-<title>Open PHACTS Search</title>
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.css" rel="stylesheet" type="text/css" />
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.css" rel="stylesheet" type="text/css" />
-<style type="text/css">
-.score {
-  color: gray;
-}
-.desc { 
-  background: #eee;
-}
-.type {
-  text-transform: capitalize;
-  font-size: smaller;
-  font-style: normal;
-  font-variant: small-caps;
-}
-.turtle { 
-  font-size: smaller;
-  display: block;
-  background: white;
-  color: #555;
-}
-</style>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Open PHACTS Search</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.css"
+    rel="stylesheet" type="text/css" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.css"
+    rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        .score {
+            color: gray;
+        }
+        .desc {
+            background: #eee;
+        }
+        .type {
+            text-transform: capitalize;
+            font-size: smaller;
+            font-style: normal;
+            font-variant: small-caps;
+        }
+        .turtle {
+            font-size: smaller;
+            display: block;
+            background: white;
+            color: #555;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="container">
-<h1>Open PHACTS Search</h1>
-
-<hr />
-<address>
-<p>
-This site hosts the prototype version of
-<a href="https://wiki.openphacts.org/index.php/IRS_2">IRS 2</a> for
-the <a href="http://www.openphacts.org/">Open PHACTS</a> project.
-</p>
-</address>
-
-<div class="jumbotron">
-
-<form action="search" role="form" id="search">
-  <p>
-	  <label for="q">Compound/target:</label>
-	  <input placeholder="histamine organism:taurus" autofocus="autofocus" class="formcontrol" name="q" id="q" size="30" autocomplete="off" />
-  </p>
-  <p>
-    <input type="submit" value="Search" class="btn btn-primary btn-lg" />
-  </p>
-</form>
-</div>
-
-<div id="results">
-  <div id="stats"></div>
-<ul id="resultlist">
-</ul>
-</div>
-
-<div id="tmpresults">
-  <div id="tmpstats"></div>
-<ul id="tmpresultlist">
-  <li>Examples:</li>
-  <li><a href="?q=histamine">histamine</a></li>
-  <li><a href="?q=histamine%20organism:taurus">histamine organism:taurus</a></li>
-  <li><a href="?q=prefLabel:histamine%20_type:compound">prefLabel:histamine _type:compound</a></li>
-  <li><a href="?q=title:histamine%20_type:target">title:histamine _type:target</a></li>
-  <li><a href="?q=histamine%20_type:enzyme">histamine _type:enzyme</a></li>
-  <li><a href="?q=antigen:CD99">antigen:CD99</a></li>
-  <li><a href="?q=internationalNonpropriatoryName:%22Eptacog%20alfa%22">internationalNonpropriatoryName:"Eptacog alfa"</a></li>
-</ul>
-</div>
-
-
-</div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.js" type="text/javascript"></script>
-<script src="https://medialize.github.io/URI.js/src/URI.min.js" type="text/javascript"></script>
-<script type="text/javascript">
-function explorer_uri(hit) {
-  if (hit["@ops_type"] == "compound") { 
-      return "https://explorer.openphacts.org/compounds?uri=" + hit["@id"];
-  } else {
-      return "https://explorer.openphacts.org/targets?uri=" + hit["@id"];
-  }
-}
-
-// based on http://stackoverflow.com/a/9229821/412540
-// by Georg Barikin
-function uniq(a) {
-  var seen = {};
-  return a.filter(function(item) {
-      key = item.toLowerCase();
-      return seen.hasOwnProperty(key) ? false : (seen[key] = true);
-  });
-}
-
-function merge_lists(lists) {
-  var list = []
-  lists.forEach(function(l) { 
-      if (Array.isArray(l)) {
-          list = list.concat(l);
-      }
-    });
-  return list
-}
-
-function render_desc(d) {
-  return " <span class='desc'>" + d + "</span>";
-}
-
-function render_hit(hit, inc_score) {
-   doc = hit;
-   names = merge_lists([doc.prefLabel, doc.title, doc.label, doc.mnemonic, doc.shortName, doc.fullName, hit["@id"]]);
-   name = names[0]; // fallback: URI from hit._id
-
-   if (hit.hasOwnProperty("highlight")) {
-     // Only show highlighted fields
-      h = hit.highlight;
-      descs = uniq(merge_lists([h.prefLabel, h.title, h.label, h.description, h.altLabel, 
-h.mnemonic, 
-h.oldMnemonic, 
-h.shortName,
-h.fullName,
-h.ecName,
-h.altFullName,
-h.antigen,
-h.altEcName,
-h.altShortName
-            ]));
-
-
-    } else {
-      descs = uniq(merge_lists([name], [doc.prefLabel, doc.title, doc.label, doc.description, doc.altLabel, 
-doc.mnemonic, 
-doc.oldMnemonic, 
-doc.shortName, 
-doc.fullName,
-doc.ecName,
-doc.altFullName,
-doc.antigen,
-doc.altEcName,
-doc.altShortName
-
-            
-            ])).slice(1);;
-    }
-   html = "<li><a href='" + explorer_uri(hit) + "'>" + name + "</a>" + 
-     " <em class='type'>" +  hit["@type"][0] +  "</em> " +
-     "<small>" + 
-       descs.map(render_desc) + "</small> " +
-			"<em>" + (doc.organism || "") + "</em> ";
- if(inc_score) {
-  html = html + "<span class='score'>" + Math.round( hit["@score"] * 100 ) / 100; + "</span>" ; 
- }
- html = html + " <code class='turtle'> &lt;<a href='" + hit["@id"] + "'>" + 
-     hit["@id"] + "</a>&gt; a " + 
-     doc["@type"] + " .</code>"+ 
-//     " <small class='index'>" + hit._index + "</small> " + 
-     "</li>";
- return html;
-}
-
-function search(query) {
-
-  $("#resultlist").empty();
-  $("#stats").empty();
-  var search = {
-	        limit: "",
-		branch: "",
-		type: "",
-                query: { 
-                  query_string: { 
-                      query: query,
-                      default_operator: "AND"
-                    },
-                },
-                size: 25,
-                highlight: {
-                  "pre_tags" : ["<strong>"],
-                  "post_tags" : ["</strong>"],
-
-                  fields: { 
-                    title: {},
-                    prefLabel: {},
-                    altLabel: {},
-                    label: {},
-                    description: {},
-                    mnemonic: {}, 
-                    oldMnemonic: {},
-                    shortName: {},
-                    fullName: {},
-                    ecName: {},
-                    altFullName: {},
-                    antigen: {},
-                    altEcName: {},
-                    altShortName: {}
-                  }
-                }
-              };
-
-// TODO: Use http://www.elasticsearch.org/blog/client-for-node-js-and-the-browser/ instad
-//$.getJSON('search?default_operator=AND&q=' + ( $("#q").val() || "histamine"), function(data) {
-  $.ajax({ type: "POST",
-               url: "search",
-               data: JSON.stringify(search),
-               contentType: "application/json",
-               dataType: "json",
-               success: function(data) {
-                  $("#resultlist").empty();
-                  $("#stats").empty();
-                  $("#stats").append(data.total + " hits for <kbd>" + query + "</kbd>:");
-                          data.hits.forEach(function(hit){
-                            $("#resultlist").append(render_hit(hit, true));
-                              
-                        });
-                  var rest = data.total - data.hits.length;
-                  if (rest > 0) {
-                    $("#resultlist").append("... and " + rest + " more");
-                  }
-               }
-  });
-  //$.ajax(ajax);
-	$("#tmpresults").hide();
-	$("#results").show();
-}
-
-$( "#search" ).submit(function(event) {
-  var query = $("#q").val() || "histamine";
-  history.pushState({}, "Search for: "+ query, "?q=" + query);
-  search(query);
-	event.preventDefault();
-});
-
-$("#q").on("input", function () {
-  $("#results").hide();
-  $("#tmpresults").show();
-  $("#tmpresultlist").empty();
-  $("#tmpstats").empty();
-  var search=$("#q").val() + "*";
-
-  $.getJSON('search?default_operator=AND&q=' + search, function(data) {
-    $("#tmpresultlist").empty();
-    $("#tmpstats").empty();
-
-    $("#tmpstats").append(data.total + " hits for <kbd>" + search + "</kbd>:");
-
-    data.hits.forEach(function(hit, i){
-      $("#tmpresultlist").append(render_hit(hit, false));
-    });
-    var rest = data.total - data.hits.length;
-    if (rest > 0) {
-      $("#tmpresultlist").append("... and " + rest + " more");
-    }
-  });
-}) //.change();
-
-function check_query() {
-//    $("#tmpresults").hide();
-    $("#results").hide();
-    var uri = new URI();
-    if (uri.hasQuery("q")) {
-      var q = uri.query(true).q;
-      $("#q").val(uri.query(true).q);
-      search(q);    
-    }
-}
-
-// check on page load
-$(check_query);
-// ... and while navigating
-$(window).on("navigate", function (event, data) {
-    // but this doesn't work :(
-    check_query();
-});
-
-</script>
-
+    <div class="container">
+        <h1>Open PHACTS Search</h1>
+        <p>Nothing to see yet</p>
+    </div>
 </body>
+
 </html>
