@@ -1,5 +1,5 @@
 elasticsearch:
-  - host: 0.0.0.0
+  - host: localhost
     port: 9200
 #  - host: docker
 #    port: 9200
@@ -20,10 +20,7 @@ prefixes:
 
 
 sparql:
-  #uri: http://sparql:8890/sparql
-  #uri: http://ops2.few.vu.nl:3030/chembl19/sparql
-  #uri: http://ops2.few.vu.nl:8890/sparql
-  uri: http://heater.cs.man.ac.uk:3003/sparql
+  uri: #sparql endpoint URI
   timeout_s: 14400 # e.g. 2 hours
 
 common_properties:
@@ -65,4 +62,3 @@ indexes:
         - sparql: uniprot:alternativeName/uniprot:allergenName
           variable: allergen
           jsonld: allergen
-
