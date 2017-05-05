@@ -313,123 +313,59 @@ The branches are:
 The types are:
 * compound
 * target
-* targetComponent
+* enzyme
 
-Or POST a query to `/search` with the payload formatted as follows, here the query is for `pfd` with a maximum of 25 `hits` to be included in the response:
+Or POST a query to `/search` as a form with params same as for the GET query.
 
-```json
-{
-    "query": {
-        "query_string": {
-            "query":"pfd","default_operator":"AND"
-        }
-    },
-    "size":25,
-    "highlight": {
-        "pre_tags": ["<strong>"],
-        "post_tags": ["</strong>"],
-        "fields": {
-            "title":{},
-            "prefLabel":{},
-            "altLabel":{},
-            "label":{},
-            "description":{},
-            "mnemonic":{},
-            "oldMnemonic":{},
-            "shortName":{},
-            "fullName":{},
-            "ecName":{},
-            "altFullName":{},
-            "antigen":{},
-            "altEcName":{},
-            "altShortName": {}
-        }
-    }
-}
-```
+eg using curl `curl -X POST -F query=Lepirudin -F type=compound http://localhost:8839/search`
 
-TODO: POST with `branch` and `type`
+# Response format
 
-The response format (in JSON) is shown below. The `total` number of hits is included in the response and here was `2`:
+Much the same as the standard Elastic Search response with the removal of the `_shards` element. The `branch` and `type` are added to remind you of the request params.
 
 ```json
 {
-    "@context": {
-        "@vocab": "http://example.com/"
+    "branch": "_all",
+    "hits": {
+        "hits": [
+            {
+                "_id": "http://bio2rdf.org/drugbank:DB00001",
+                "_index": "drugbank",
+                "_score": 21.372051,
+                "_source": {
+                    "@id": "http://bio2rdf.org/drugbank:DB00001",
+                    "@type": [
+                        "drugbank:Drug"
+                    ],
+                    "brand_name": [
+                        "Refludan"
+                    ],
+                    "label": [
+                        "Lepirudin [drugbank:DB00001]"
+                    ],
+                    "synonym": [
+                        "Hirudin variant-1"
+                    ],
+                    "title": [
+                        "Lepirudin"
+                    ]
+                },
+                "_type": "compound",
+                "highlight": {
+                    "label": [
+                        "<em>Lepirudin</em> [drugbank:DB00001]"
+                    ],
+                    "title": [
+                        "<em>Lepirudin</em>"
+                    ]
+                }
+            }
+        ],
+        "max_score": 21.372051,
+        "total": 1
     },
-    "@id": "/search/pfd",
-    "hits": [
-        {
-            "@id": "http://rdf.ebi.ac.uk/resource/chembl/targetcomponent/CHEMBL_TC_6985",
-            "@ops_type": "targetComponent",
-            "@score": 2.3294637,
-            "@type": [
-                "chembl:TargetComponent"
-            ],
-            "altLabel": [
-                "CFD",
-                "Complement factor D",
-                "Adipsin",
-                "C3 convertase activator",
-                "DF ",
-                "PFD",
-                "Properdin factor D"
-            ],
-            "chemblId": [
-                "CHEMBL_TC_6985"
-            ],
-            "description": [
-                "Complement factor D"
-            ],
-            "label": [
-                "CHEMBL_TC_6985"
-            ],
-            "organism": [
-                "Homo sapiens"
-            ]
-        },
-        {
-            "@id": "http://purl.obolibrary.org/obo/CHEBI_31263",
-            "@ops_type": "compound",
-            "@score": 0.73953164,
-            "@type": [
-                "owl:Class"
-            ],
-            "Definition": [
-                "The dipeptide obtained by condensation of N-benzoyl-L-tyrosine with 4-aminobenzoic acid. Used as a noninvasive screening test for exocrine pancreatic insufficiency and to monitor the adequacy of supplemental pancreatic therapy, it is given by mouth: the amount of 4-aminobenzoic acid and its metabolites excreted in the urine is taken as a measure of the chymotrypsin-secreting activity of the pancreas."
-            ],
-            "Synonym": [
-                "(S)-4-((2-(benzoylamino)-3-(4-hydroxyphenyl)-1-oxopropyl)amino)benzoic acid",
-                "4-(N-benzoyl-L-tyrosylamino)benzoic acid",
-                "4-[(N-benzoyl-L-tyrosyl)amino]benzoic acid",
-                "BT-PABA",
-                "BTPABA",
-                "C23H20N2O5",
-                "N-benzoyl-L-tyrosyl-p-aminobenzoate",
-                "N-benzoyl-L-tyrosyl-p-aminobenzoic acid",
-                "PFD",
-                "PFT",
-                "bentiromide",
-                "bentiromido",
-                "bentiromidum",
-                "benzoyltyrosyl-p-aminobenzoic acid",
-                "(S)-p-(alpha-benzamido-p-hydroxyhydrocinnamamido)benzoic acid"
-            ],
-            "label": [
-                "bentiromide"
-            ],
-            "xref": [
-                "Beilstein:2910938",
-                "DrugBank:DB00522",
-                "KEGG DRUG:37106-97-1",
-                "KEGG DRUG:D01346",
-                "Patent:DE2156835",
-                "Patent:US3801562",
-                "Wikipedia:Bentiromide"
-            ]
-        }
-    ],
-    "query": "pfd",
-    "total": 2
+    "type": "compound",
+    "timed_out": false,
+    "took": 22
 }
 ```
