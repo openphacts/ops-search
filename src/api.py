@@ -107,9 +107,9 @@ def search_json(query=None):
         ops_type = None
     search = es_search(query, branch, ops_type, limit)
     if ops_type == None:
-        search["ops_type"] = "_all"
+        search["type"] = "_all"
     else:
-        search["ops_type"] = ops_type
+        search["type"] = ops_type
     if branch == "":
         search["branch"] = "_all"
     else:
@@ -141,14 +141,15 @@ def search_json_post(query=None):
     if limit == None:
         limit = "25"
     search = es_search(query, branch, ops_type, limit)
-    if ops_type == "":
-        search["ops_type"] = "_all"
+    if ops_type == None:
+        search["type"] = "_all"
     else:
-        search["ops_type"] = ops_type
-    if branch == "":
+        search["type"] = ops_type
+    if branch == None:
         search["branch"] = "_all"
     else:
        search["branch"] = branch
+    search.pop("_shards", None)
     return search
 
 def main(config_file, port="8839", *args):
