@@ -28,11 +28,8 @@ prefixes:
 
 
 sparql:
-  #uri: http://sparql:8890/sparql
-  #uri: http://ops2.few.vu.nl:3030/chembl19/sparql
-  #uri: http://ops2.few.vu.nl:8890/sparql
-  uri: http://heater.cs.man.ac.uk:3003/sparql
-  timeout_s: 14400 # e.g. 2 hours
+  uri: #sparql endpoint URL
+   timeout_s: 14400 # e.g. 2 hours
 
 common_properties:
   - rdfs:label
@@ -45,11 +42,6 @@ indexes:
         subclasses: owl
         properties:
           - chembl:chemblId
-          - dct:title
-          - sparql: dc:title
-            variable: dctitle
-            jsonld: title
-          - rdfs:description
           - skos:prefLabel
           - skos:altLabel
     target:
@@ -155,9 +147,9 @@ indexes:
       type: owl:Class
       #subClassOf: obo:CHEBI_23367 # molecular entity
       properties:
-        - rdfs:description
-        - dc:title
-        - dc:description
+#        - rdfs:description
+#        - dc:title
+#        - dc:description
         - obohash:Synonym
         - obohash:xref
         - obohash:Definition
