@@ -5,6 +5,8 @@ from bottle import hook, route, run, Bottle, get, post, request, response, stati
 from urllib.parse import quote
 import os.path
 from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search, Q
+from elasticsearch_dsl.query import MultiMatch, Match
 from elasticsearch.exceptions import NotFoundError
 import yaml
 import sys
@@ -43,20 +45,14 @@ def elasticsearch():
     es = Elasticsearch(es_hosts)
     return es
 
-def es_search(query, branch, ops_type, limit):
-    if ops_type is None:
-        ops_type = "_all"
-    search = {
-        "query": {
-          "multi_match": {
-            "query":    query,
-            "fields": [ "label^2", "prefLabel^2", "description", "altLabel", "Synonym", "Definition" ],
-            "fuzziness": 1
-        }
-      },
-      "size": limit
-    }
-    return elasticsearch().search(index=branch, doc_type=ops_type, body = search)
+def es_search(query_string, branch, ops_type, limit):
+    s = Search(using=elasticsearch(), index=branch, doc_type=ops_type)
+    s = s[0:int(limit)]
+    q = Q("multi_match", query=query_string, fields=['label^2', 'title^2', 'prefLabel^2', 'description', 'altLabel', 'Synonym', 'Definition'], fuzziness=1, type='best_fields')
+    s = s.highlight('label', 'title', 'description', 'prefLabel', 'description', 'altLabel', 'Synonym', 'Definition')
+    s = s.query(q)
+    es_response = s.execute()
+    return es_response.to_dict()
 
 @hook('after_request')
 def enable_cors():
@@ -105,22 +101,20 @@ def search_json(query=None):
     response.set_header("Content-Location", id)
     # CORS header
     response.set_header("Access-Control-Allow-Origin", "*")
-    json = { "@context": {"@vocab": "http://example.com/"}, "@id": id, "query": query, "hits": [] }
-    hits = json["hits"]
     if limit == "":
         limit = "25"
     if ops_type == "":
         ops_type = None
     search = es_search(query, branch, ops_type, limit)
-    json["total"] = search["hits"]["total"]
-    for hit in search["hits"]["hits"]:
-        source = hit["_source"]
-        score = hit["_score"]
-        ops_type = hit["_type"]
-        source["@score"] = score
-        source["@ops_type"] = ops_type
-        hits.append(source)
-    return json
+    if ops_type == None:
+        search["ops_type"] = "_all"
+    else:
+        search["ops_type"] = ops_type
+    if branch == "":
+        search["branch"] = "_all"
+    else:
+       search["branch"] = branch
+    return search
 
 @post("/search")
 @produces(
@@ -145,9 +139,9 @@ def search_json_post(query=None):
     json = { "@context": {"@vocab": "http://example.com/"}, "@id": id, "query": query, "hits": [] }
     hits = json["hits"]
     if limit == "":
-        limit = "25"
+        limit = 25
     if ops_type == "":
-        ops_type = None
+        ops_type = "_all"
     if branch == "":
       branch = None
     search = es_search(query, branch, ops_type, limit)
