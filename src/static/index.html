@@ -89,8 +89,10 @@ the <a href="http://www.openphacts.org/">Open PHACTS</a> project.
 function explorer_uri(hit) {
   if (hit["_type"] == "compound") { 
       return "https://explorer.openphacts.org/compounds?uri=" + hit["_id"];
-  } else {
+  } else if (hit["_type"] == "target"){
       return "https://explorer.openphacts.org/targets?uri=" + hit["_id"];
+  } else if (hit["_type"] == "enzyme") {
+      return "https://explorer.openphacts.org/enzyme?uri=" + hit["_id"];
   }
 }
 
