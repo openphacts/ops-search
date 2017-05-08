@@ -130,10 +130,19 @@ def search_json(query=None):
 )
 def search_json_post(query=None):
     postdata = request.body.read()
-    query = request.forms.get("query")
-    limit = request.forms.get("limit")
-    branch = request.forms.get("branch")
-    ops_type = request.forms.get("type")
+    query = None
+    limit = None
+    ops_type = None
+    branch = None
+    if "query" in request.json:
+        query = request.json["query"]
+    if "limit" in request.json:
+        limit = request.json["limit"]
+    if "branch" in request.json:
+        branch = request.json["branch"]
+    if "type" in request.json:
+        ops_type = request.json["type"]
+    print(query)
 
     response.set_header("Content-Location", id)
     # CORS header
