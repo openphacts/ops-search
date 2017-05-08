@@ -315,9 +315,9 @@ The types are:
 * target
 * enzyme
 
-Or POST a query to `/search` as a form with params same as for the GET query.
+Or POST a query to `/search`with JSON data and the same params as for the GET query.
 
-eg using curl `curl -X POST -F query=Lepirudin -F type=compound http://localhost:8839/search`
+eg `curl -H "Content-Type: application/json" -X POST -d '{"query":"Lepirudin"}' http://localhost:8839/search`
 
 # Response format
 
