@@ -321,7 +321,7 @@ eg `curl -H "Content-Type: application/json" -X POST -d '{"query":"Lepirudin"}' 
 
 # Response format
 
-Much the same as the standard Elastic Search response with the removal of the `_shards` element. The `branch` and `type` are added to remind you of the request params.
+Much the same as the standard Elastic Search response with the removal of the `_shards` element. The `branch` and `type` are added to remind you of the request params. Each hit has a `highlight` section which shows what triggered the response.
 
 ```json
 {
@@ -369,3 +369,6 @@ Much the same as the standard Elastic Search response with the removal of the `_
     "took": 22
 }
 ```
+
+## Simple Web Application Demo
+There is a web page available via the root ie `http://localhost:8839` which demonstrates basic usage of the API. It provides a search box which will fetch results via `GET` when you type in it and a button which will `POST`. The ffirst 25 results are fetched and ordered with the highest hit first. Each result shows the highlight which returned the hit in bold.
