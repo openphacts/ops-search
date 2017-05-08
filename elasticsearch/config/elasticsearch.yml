@@ -1,4 +1,4 @@
 script.inline: off
-script.indexed: off
+#script.indexed: off
 http.cors.enabled: true
 network.host: 0.0.0.0
