@@ -62,3 +62,10 @@ indexes:
         - sparql: uniprot:alternativeName/uniprot:allergenName
           variable: allergen
           jsonld: allergen
+    enzyme:
+      graph: http://purl.uniprot.org/enzyme
+      type: uniprot:Enzyme
+      properties:
+        - skos:prefLabel
+        - skos:altLabel
+        - uniprot:cofactorLabel
