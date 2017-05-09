@@ -1,13 +1,13 @@
 
 elasticsearch:
-  - host: 192.168.59.103
+  - host: localhost
     port: 9200
 #  - host: docker
 #    port: 9200
 
 webservice:
-  host: 'localhost'
-  port: 8983
+  host: '0.0.0.0'
+  port: 8839
 
 ims:
   uri: http://example.com:8080/ims
