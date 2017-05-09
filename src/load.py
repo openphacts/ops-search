@@ -161,6 +161,8 @@ class Indexer:
         self.reset_stats()
         self.properties = {}
         self.blanknodes = {}
+        self.sparql_query = ""
+        self.limit_sparql_query = ""
 
     def sort_properties(self, properties):
         properties.sort(key=negate(is_property_required))
@@ -252,6 +254,7 @@ class Indexer:
         print()
         print(sparqlStr)
         print()
+        self.sparql_query = sparqlStr
         return sparqlStr
 
     def sparqlURL(self):
@@ -259,18 +262,18 @@ class Indexer:
                         get("timeout_s",
                             DEFAULT_SPARQL_TIMEOUT)) * 1000
         return urljoin(self.session.conf["sparql"]["uri"],
-            "?" + urlencode(dict(query=self.sparql(),
+            "?" + urlencode(dict(query=self.limit_sparql_query,
                                  timeout=timeout)))
 
     def json_reader(self):
         url = self.sparqlURL()
+        print(url)
         with self.session.urlOpener.open(url) as jsonFile:
             bindings = ijson.items(jsonFile, "results.bindings.item")
             for binding in bindings:
-                #print(binding)
                 n = self.binding_as_doc(binding)
                 if n is not None:
-                    #print(n)
+#                    print(n)
                     yield n
 
     def skolemize(self, bnode):
@@ -415,9 +418,31 @@ class Indexer:
         return msg
 
     def load(self):
+        page = 0
+        fetched = 0
+        LIMIT = 1000
+        OFFSET = 0
+        self.sparql()
         print("Index %s type %s" % (self.index, self.doc_type))
         self.reset_stats()
-        bulk(self.session.es, self.json_reader(), raise_on_error=True)
+        # Fetch all the results (not just virtuoso default 10000 limit)
+        count_query = self.sparql_query.replace('*', '(COUNT(?id) as ?id_count)')
+        timeout = int(self.session.conf["sparql"].
+                        get("timeout_s",
+                            DEFAULT_SPARQL_TIMEOUT)) * 1000
+        url = urljoin(self.session.conf["sparql"]["uri"],
+            "?" + urlencode(dict(query=count_query,
+                                 timeout=timeout)))
+        with self.session.urlOpener.open(url) as response:
+            string = response.read().decode('utf-8')
+            result = json.loads(string)
+            total = int(result["results"]["bindings"][0]["id_count"]["value"])
+        while fetched < total:
+            limit_string = "LIMIT 1000 OFFSET " + str(page * 1000)
+            self.limit_sparql_query = self.sparql_query + limit_string
+            bulk(self.session.es, self.json_reader(), raise_on_error=True)
+            page += 1
+            fetched += 1000
         # final statistics
         self.print_statistics()
 
