@@ -160,7 +160,6 @@ function search(query) {
 
 // TODO: Use http://www.elasticsearch.org/blog/client-for-node-js-and-the-browser/ instad
 
-//$.getJSON('search?default_operator=AND&q=' + ( $("#q").val() || "histamine"), function(data) {
   $.ajax({ type: "POST",
                url: "search",
 	       data: JSON.stringify({"query": query}),
@@ -199,7 +198,7 @@ $("#q").on("input", function () {
   $("#tmpstats").empty();
   var search=$("#q").val() + "*";
 
-  $.getJSON('search?default_operator=AND&query=' + search, function(data) {
+  $.getJSON('search?query=' + search, function(data) {
     $("#tmpresultlist").empty();
     $("#tmpstats").empty();
 
