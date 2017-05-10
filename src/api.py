@@ -97,6 +97,7 @@ def search_json(query=None):
         branch = request.query.branch
         limit = request.query.limit
         ops_type = request.query.type
+        options = request.query.getall("options")
     id = quote(url("/search/<query>", query=query))
     response.set_header("Content-Location", id)
     # CORS header
@@ -114,8 +115,14 @@ def search_json(query=None):
         search["branch"] = "_all"
     else:
        search["branch"] = branch
-    search.pop("_shards", None)
-    return search
+    if options != None and "uris_only" in options:
+      uris = []
+      for hit in search["hits"]["hits"]:
+          uris.append(hit["_id"])
+      return {"uris": uris}
+    else:
+      search.pop("_shards", None)
+      return search
 
 @post("/search")
 @produces(
@@ -134,6 +141,7 @@ def search_json_post(query=None):
     limit = None
     ops_type = None
     branch = None
+    options = None
     if "query" in request.json:
         query = request.json["query"]
     if "limit" in request.json:
@@ -142,7 +150,8 @@ def search_json_post(query=None):
         branch = request.json["branch"]
     if "type" in request.json:
         ops_type = request.json["type"]
-    print(query)
+    if "options" in request.json:
+        options = request.json["options"]
 
     response.set_header("Content-Location", id)
     # CORS header
@@ -158,8 +167,14 @@ def search_json_post(query=None):
         search["branch"] = "_all"
     else:
        search["branch"] = branch
-    search.pop("_shards", None)
-    return search
+    if options != None and "uris_only" in options:
+      uris = []
+      for hit in search["hits"]["hits"]:
+          uris.append(hit["_id"])
+      return {"uris": uris}
+    else: 
+      search.pop("_shards", None)
+      return search
 
 def main(config_file, port="8839", *args):
     global conf

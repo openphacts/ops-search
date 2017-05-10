@@ -301,7 +301,7 @@ The API has a fuzziness setting of 1 to allow for simple mispellings of eg Aspir
 
 ## Request and Response
 
-Send a GET request to `/search/` with your query as the last part of the URL eg. `http://example.com/search/pfd` or as the parameter `q` eg `http://example.com/search?q=pfd`. You can also include the branch to search for `b`, the type `t` and the limit `l` eg `http://example.com/search?q=asp&b=chebi&t=compound&l=10`.
+Send a GET request to `/search/` with your query as the last part of the URL eg. `http://example.com/search/pfd` or as the parameter `q` eg `http://example.com/search?q=pfd`. You can also include the branch to search for `b`, the type `t` and the limit `l` eg `http://example.com/search?q=asp&b=chebi&t=compound&l=10`. If you want only a list of the URIs of the hits then add an options array param which contains "uris_only".
 
 The branches are:
 * chebi
@@ -367,6 +367,28 @@ Much the same as the standard Elastic Search response with the removal of the `_
     "type": "compound",
     "timed_out": false,
     "took": 22
+}
+```
+# With "uris_only" option
+
+`curl -X GET "http://localhost:8839/search?query=abc&options=uris_only&limit=10" --globoff`
+
+`curl -H "Content-Type: application/json" -X POST -d '{"query":"abc", "limit": 10, "options": ["uris_only"]}' http://localhost:8839/search`
+
+```json
+{
+    "uris": [
+        "http://bio2rdf.org/drugbank:BE0002647",
+        "http://bio2rdf.org/drugbank:DB06080",
+        "http://bio2rdf.org/drugbank:DB05407",
+        "http://bio2rdf.org/drugbank:DB05458",
+        "http://bio2rdf.org/drugbank:DB05901",
+        "http://bio2rdf.org/drugbank:BE0004300",
+        "http://bio2rdf.org/drugbank:DB05434",
+        "http://bio2rdf.org/drugbank:DB05764",
+        "http://bio2rdf.org/drugbank:DB05883",
+        "http://bio2rdf.org/drugbank:DB05459"
+    ]
 }
 ```
 
