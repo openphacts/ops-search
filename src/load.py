@@ -418,31 +418,31 @@ class Indexer:
         return msg
 
     def load(self):
-        page = 0
-        fetched = 0
-        LIMIT = 1000
-        OFFSET = 0
         self.sparql()
-        print("Index %s type %s" % (self.index, self.doc_type))
         self.reset_stats()
-        # Fetch all the results (not just virtuoso default 10000 limit)
-        count_query = self.sparql_query.replace('*', '(COUNT(?id) as ?id_count)')
-        timeout = int(self.session.conf["sparql"].
-                        get("timeout_s",
-                            DEFAULT_SPARQL_TIMEOUT)) * 1000
-        url = urljoin(self.session.conf["sparql"]["uri"],
-            "?" + urlencode(dict(query=count_query,
-                                 timeout=timeout)))
-        with self.session.urlOpener.open(url) as response:
-            string = response.read().decode('utf-8')
-            result = json.loads(string)
-            total = int(result["results"]["bindings"][0]["id_count"]["value"])
-        while fetched < total:
-            limit_string = "LIMIT 1000 OFFSET " + str(page * 1000)
-            self.limit_sparql_query = self.sparql_query + limit_string
+        print("Index %s type %s" % (self.index, self.doc_type))
+        if "limit" in self.session.conf["sparql"]:
+            self.limit_sparql_query = self.sparql_query
             bulk(self.session.es, self.json_reader(), raise_on_error=True)
-            page += 1
-            fetched += 1000
+        else:
+            page = 0
+            fetched = 0
+            LIMIT = 1000
+            OFFSET = 0
+            # Fetch all the results (not just virtuoso default 10000 limit)
+            count_query = self.sparql_query.replace('*', '(COUNT(?id) as ?id_count)')
+            timeout = int(self.session.conf["sparql"].get("timeout_s", DEFAULT_SPARQL_TIMEOUT)) * 1000
+            url = urljoin(self.session.conf["sparql"]["uri"],"?" + urlencode(dict(query=count_query, timeout=timeout)))
+            with self.session.urlOpener.open(url) as response:
+                string = response.read().decode('utf-8')
+                result = json.loads(string)
+                total = int(result["results"]["bindings"][0]["id_count"]["value"])
+            while fetched < total:
+                limit_string = "LIMIT 1000 OFFSET " + str(page * 1000)
+                self.limit_sparql_query = self.sparql_query + limit_string
+                bulk(self.session.es, self.json_reader(), raise_on_error=True)
+                page += 1
+                fetched += 1000
         # final statistics
         self.print_statistics()
 
