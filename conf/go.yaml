@@ -29,7 +29,7 @@ common_properties:
 indexes:
   go:
     gene:
-      graph: http://geneontology.org
+      graph: http://www.geneontology.org
       type: owl:Class 
       properties:
         - go:hasRelatedSynonym
