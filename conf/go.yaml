@@ -1,0 +1,38 @@
+
+elasticsearch:
+  - host: localhost
+    port: 9200
+#  - host: docker
+#    port: 9200
+
+prefixes:
+  rdfs: http://www.w3.org/2000/01/rdf-schema#
+  owl: http://www.w3.org/2002/07/owl#
+  dct: http://purl.org/dc/terms/
+  dc: http://purl.org/dc/elements/1.1/
+  skos: http://www.w3.org/2004/02/skos/core#
+  chembl: http://rdf.ebi.ac.uk/terms/chembl#
+  cheminf: http://semanticscience.org/resource/
+  uniprot: http://purl.uniprot.org/core/
+  drugbank: http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/
+  obohash: http://purl.obolibrary.org/obo#
+  oboslash: http://purl.obolibrary.org/obo/
+  go: http://www.geneontology.org/formats/oboInOwl#
+
+sparql:
+  uri: #Add sparql endpoint here
+  timeout_s: 7200 # e.g. 2 hours
+
+common_properties:
+  - rdfs:label
+
+indexes:
+  go:
+    gene:
+      graph: http://geneontology.org
+      type: owl:Class 
+      properties:
+        - go:hasRelatedSynonym
+        - go:hasExactSynonym
+        - go:hasNarrowSynonym
+        - go:hasBroadSynonym
