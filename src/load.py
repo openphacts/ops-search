@@ -44,10 +44,10 @@ def is_property_required(prop):
     return is_required
 
 class Session:
-    def __init__(self, config_file):
-        with open(config_file) as f:
+    def __init__(self, args, loadOnly):
+        with open(args) as f:
             self.conf = yaml.load(f)
-
+        self.loadOnly = loadOnly
         es_hosts = self.conf.get("elasticsearch")
         print("###")
         print("# SPARQL endpoint: " + self.conf["sparql"]["uri"])
@@ -73,10 +73,11 @@ class Session:
 
     def run(self):
         for index in self.conf["indexes"]:
-            try:
+            if not self.loadOnly:
+              try:
                 self.es.indices.delete(index=index)
-            except NotFoundError:
-                pass
+              except NotFoundError:
+                  pass
             for doc_type in self.conf["indexes"][index]:
                 indexer = Indexer(self, index, doc_type)
                 ## TODO: Store mapping for JSON-LD
@@ -213,6 +214,7 @@ class Indexer:
         sparql.append("WHERE {")
 
         if "graph" in self.conf:
+            print(self.conf["graph"])
             sparql.append(" GRAPH <%s> {" % self.conf["graph"])
 
         if "type" in self.conf:
@@ -454,21 +456,28 @@ def main(*args):
     if dryrun:
         args = args - dryrunOpts
 
+    loadOpts = set(("-l", "--load-only"))
+    loadOnly = args.intersection(loadOpts)
+    if loadOnly:
+        args = args - loadOpts
+
     if not args or args.intersection(set(("-h", "--help"))):
         print("Usage: %s [-d] [-h] [config]" % sys.argv[0])
         print("")
         print("-h --help     print this help")
+        print("-l --load-only do not delete existing index just load more docs")
         print("-d --dry-run  no network activities, just print the SPARQL")
         print("")
         print("See example.yaml for an example configuraton file")
         print("and README.md for details.")
         return 0
 
-    if len(args) > 1:
+    if len(args) > 2:
         print("Unexpected additional arguments:", " ".join(args), file=sys.stderr)
         return 1
-
-    session = Session(args.pop())
+    if loadOnly:
+        loadOnly = True
+    session = Session(args.pop(), loadOnly)
     session.check()
     if dryrun:
         print("### DRY RUN -- no indexes modified")
