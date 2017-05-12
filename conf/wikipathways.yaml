@@ -1,0 +1,87 @@
+elasticsearch:
+  - host: localhost
+    port: 9200
+#  - host: docker
+#    port: 9200
+
+prefixes:
+  rdfs: http://www.w3.org/2000/01/rdf-schema#
+  owl: http://www.w3.org/2002/07/owl#
+  dct: http://purl.org/dc/terms/
+  dc: http://purl.org/dc/elements/1.1/
+  skos: http://www.w3.org/2004/02/skos/core#
+  chembl: http://rdf.ebi.ac.uk/terms/chembl#
+  cheminf: http://semanticscience.org/resource/
+  uniprot: http://purl.uniprot.org/core/
+  drugbank: "http://bio2rdf.org/drugbank_vocabulary:"
+  obohash: http://purl.obolibrary.org/obo#
+  oboslash: http://purl.obolibrary.org/obo/
+  wp: http://vocabularies.wikipathways.org/wp#
+
+
+sparql:
+  uri: #sparql endpoint URI
+  timeout_s: 14400 # e.g. 2 hours
+
+common_properties:
+  - dct:identifier
+  - dc:title
+  - dct:description
+  - wp:organismName
+
+indexes:
+  wikipathways:
+    arabidopsis_thaliana:
+      graph: http://www.wikipathways.org/wp/Arabidopsis_thaliana
+      type: wp:Pathway
+    bacillus_subtilis:
+      graph: http://www.wikipathways.org/wp/Bacillus_subtilis
+      type: wp:Pathway
+    chicken:
+      graph: http://www.wikipathways.org/wp/Chicken
+      type: wp:Pathway
+    chimpanzee:
+      graph: http://www.wikipathways.org/wp/Chimpanzee
+      type: wp:Pathway
+    cow:
+      graph: http://www.wikipathways.org/wp/Cow
+      type: wp:Pathway
+    dog:
+      graph: http://www.wikipathways.org/wp/Dog
+      type: wp:Pathway
+    e_coli:
+      graph: http://www.wikipathways.org/wp/Escherichia_coli
+      type: wp:Pathway
+    fruit_fly:
+      graph: http://www.wikipathways.org/wp/Fruit_fly
+      type: wp:Pathway
+    fusarium_graminearum:
+      graph: http://www.wikipathways.org/wp/Fusarium_graminearum
+      type: wp:Pathway
+    human:
+      graph: http://www.wikipathways.org/wp/Human
+      type: wp:Pathway
+    maize:
+      graph: http://www.wikipathways.org/wp/Maize
+      type: wp:Pathway
+    mosquito:
+      graph: http://www.wikipathways.org/wp/Mosquito
+      type: wp:Pathway
+    mouse:
+      graph: http://www.wikipathways.org/wp/Mouse
+      type: wp:Pathway
+    rat:
+      graph: http://www.wikipathways.org/wp/Rat
+      type: wp:Pathway
+    rice:
+      graph: http://www.wikipathways.org/wp/Rice
+      type: wp:Pathway
+    worm:
+      graph: http://www.wikipathways.org/wp/Worm
+      type: wp:Pathway
+    yeast:
+      graph: http://www.wikipathways.org/wp/Yeast
+      type: wp:Pathway
+    zebra_fish:
+      graph: http://www.wikipathways.org/wp/Zebra_fish
+      type: wp:Pathway
