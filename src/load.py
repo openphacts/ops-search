@@ -72,9 +72,73 @@ class Session:
         return "\n".join(sparql)
 
     def run(self):
+        print("hello")
         for index in self.conf["indexes"]:
             try:
-                self.es.indices.delete(index=index)
+                self.es.indices.delete(index=index, ignore=404)
+                settings = {
+                    "settings": {
+                        "analysis": {
+                            "filter": {
+                                "nGram_filter": {
+                                    "type": "nGram",
+                                    "min_gram": 4,
+                                    "max_gram": 10,
+                                    "token_chars": [
+                                        "letter",
+                                        "digit",
+                                        "punctuation",
+                                        "symbol"
+                                    ]
+                                }
+                            },
+                            "analyzer": {
+                                "nGram_analyzer": {
+                                    "type": "custom",
+                                    "tokenizer": "whitespace",
+                                    "filter": [
+                                        "lowercase",
+                                        "asciifolding",
+                                        "nGram_filter"
+                                   ]
+                                },
+                                "whitespace_analyzer": {
+                                    "type": "custom",
+                                    "tokenizer": "whitespace",
+                                    "filter": [
+                                        "lowercase",
+                                        "asciifolding"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "mappings": {
+                        "compound": {
+                            "properties": {
+                                "label": {
+                                    "type": "string",
+                                    "analyzer": "nGram_analyzer"
+                                },
+                                "title": {
+                                    "type": "string",
+                                    "analyzer": "nGram_analyzer"
+                                },
+                                 "synonym": {
+                                    "type": "string",
+                                    "analyzer": "nGram_analyzer"
+
+                                },
+                                 "brand_name": {
+                                    "type": "string",
+                                    "analyzer": "nGram_analyzer"
+                                }
+                            }
+                        }
+                    }
+                }
+                res = self.es.indices.create(index=index, body=settings)
+                print(" response: '%s'" % (res))
             except NotFoundError:
                 pass
             for doc_type in self.conf["indexes"][index]:
