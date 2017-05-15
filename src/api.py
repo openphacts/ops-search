@@ -91,6 +91,7 @@ def html_pre(json):
 )
 def index_info():
     response.content_type = 'application/json'
+    response.set_header("Access-Control-Allow-Origin", "*")
     indexes = []
     for index in conf.get("indexes"):
       indexes.append(index)
