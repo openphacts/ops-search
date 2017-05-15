@@ -125,10 +125,9 @@ def search_json(query=None):
         limit = "25"
     if ops_type == "":
         ops_type = None
-    if ops_type != None and ops_type not in conf["indexes"]:
+    if branch != "" and not set(branch).issubset(conf["indexes"].keys()):
         response.status = 422
-        response.content_type = 'application/json'
-        return json.dumps({'error': 'Branch is not available for searching'})
+        return {'error': 'One of your selected branches is not available for searching'}
     search = es_search(query, branch, ops_type, limit)
     if ops_type == None:
         search["type"] = "_all"
@@ -180,6 +179,9 @@ def search_json_post(query=None):
     response.set_header("Access-Control-Allow-Origin", "*")
     if limit == None:
         limit = "25"
+    if branch != None and not set(branch).issubset(conf["indexes"].keys()):
+        response.status = 422
+        return {'error': 'One of your selected branches is not available for searching'}
     search = es_search(query, branch, ops_type, limit)
     if ops_type == None:
         search["type"] = "_all"
