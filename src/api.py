@@ -46,7 +46,7 @@ def elasticsearch():
     return es
 
 def es_search(query_string, branch, ops_type, limit):
-    s = Search(using=elasticsearch(), index=branch, doc_type=ops_type)
+    s = Search(using=elasticsearch(), index=(branch), doc_type=ops_type)
     s = s[0:int(limit)]
     q = Q('multi_match', query=query_string, fields=['label^2', 'title^2', 'prefLabel^2', 'identifier', 'description', 'altLabel', 'Synonym', 'Definition'], fuzziness=1, type='best_fields')
     s = s.highlight('label', 'title', 'identifier', 'description', 'prefLabel', 'description', 'altLabel', 'Synonym', 'Definition')
@@ -94,7 +94,7 @@ def search_json(query=None):
     if query is None:
         # Get from ?q parameter instead, if exist
         query = request.query.query
-        branch = request.query.branch
+        branch = request.query.getall("branch")
         limit = request.query.limit
         ops_type = request.query.type
         options = request.query.getall("options")
