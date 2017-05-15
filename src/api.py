@@ -78,6 +78,24 @@ def html_pre(json):
     """
     return template % cgi.escape(json_pretty(json))
 
+@get("/indexes")
+@produces(
+    default = "json",
+    #json = lambda **doc: doc,
+    json = lambda **doc: json_pretty(doc),
+    jsonld = lambda **doc: json.dumps(doc),
+    html = lambda **doc: html_pre(doc),
+    turtle = lambda **doc: render_rdf(doc, "turtle"),
+    rdfxml = lambda **doc: render_rdf(doc, "xml"),
+    nt = lambda **doc: render_rdf(doc, "nt")
+)
+def index_info():
+    response.content_type = 'application/json'
+    indexes = []
+    for index in conf.get("indexes"):
+      indexes.append(index)
+    return {"indexes": indexes}
+
 @get("/search")
 @get("/search/<query>")
 @produces(

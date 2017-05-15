@@ -82,6 +82,8 @@ You need to create a config file similar to
 
 To allow external access to the API you may need to change the webservice host setting in your version of the config file to eg '0.0.0.0'. You can also change the port where it is accessed. Note that we recommend that in production you run the API in a WSGI compatible webserver.
 
+The list of indexes that you specify in the conf file is used to restrict searches to those branches (see below). 
+
 A description of each element of the configuration follows below:
 
 ### ElasticSearch
@@ -298,6 +300,8 @@ properties must be present in the graph (match by pattern).
 ## API defaults
 
 The API has a fuzziness setting of 1 to allow for simple mispellings of eg Aspirin to Asprin. The `label` field has also been boosted by 2 which means that it takes precedence over other fields.
+
+To see the available indexes send a GET request to `/indexes`.
 
 ## Request and Response
 
