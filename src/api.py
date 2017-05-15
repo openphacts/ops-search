@@ -125,6 +125,10 @@ def search_json(query=None):
         limit = "25"
     if ops_type == "":
         ops_type = None
+    if ops_type != None and ops_type not in conf["indexes"]:
+        response.status = 422
+        response.content_type = 'application/json'
+        return json.dumps({'error': 'Branch is not available for searching'})
     search = es_search(query, branch, ops_type, limit)
     if ops_type == None:
         search["type"] = "_all"
