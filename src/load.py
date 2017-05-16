@@ -44,10 +44,10 @@ def is_property_required(prop):
     return is_required
 
 class Session:
-    def __init__(self, config_file):
-        with open(config_file) as f:
+    def __init__(self, args, loadOnly):
+        with open(args) as f:
             self.conf = yaml.load(f)
-
+        self.loadOnly = loadOnly
         es_hosts = self.conf.get("elasticsearch")
         print("###")
         print("# SPARQL endpoint: " + self.conf["sparql"]["uri"])
@@ -74,40 +74,28 @@ class Session:
     def run(self):
         print("hello")
         for index in self.conf["indexes"]:
+          if not self.loadOnly:
             try:
-                self.es.indices.delete(index=index, ignore=404)
+                res = self.es.indices.delete(index=index, ignore=404)
+                print("response : '%s'" % (res))
                 settings = {
                     "settings": {
+                        "number_of_shards": 1, 
                         "analysis": {
                             "filter": {
-                                "nGram_filter": {
-                                    "type": "nGram",
-                                    "min_gram": 4,
-                                    "max_gram": 10,
-                                    "token_chars": [
-                                        "letter",
-                                        "digit",
-                                        "punctuation",
-                                        "symbol"
-                                    ]
+                                "autocomplete_filter": { 
+                                    "type":     "edge_ngram",
+                                    "min_gram": 1,
+                                    "max_gram": 20
                                 }
                             },
                             "analyzer": {
-                                "nGram_analyzer": {
-                                    "type": "custom",
-                                    "tokenizer": "whitespace",
+                                "autocomplete": {
+                                    "type":      "custom",
+                                    "tokenizer": "standard",
                                     "filter": [
                                         "lowercase",
-                                        "asciifolding",
-                                        "nGram_filter"
-                                   ]
-                                },
-                                "whitespace_analyzer": {
-                                    "type": "custom",
-                                    "tokenizer": "whitespace",
-                                    "filter": [
-                                        "lowercase",
-                                        "asciifolding"
+                                        "autocomplete_filter" 
                                     ]
                                 }
                             }
@@ -118,20 +106,32 @@ class Session:
                             "properties": {
                                 "label": {
                                     "type": "string",
-                                    "analyzer": "nGram_analyzer"
+                                    "analyzer": "autocomplete",
+                                    "search_analyzer": "standard"
                                 },
                                 "title": {
                                     "type": "string",
-                                    "analyzer": "nGram_analyzer"
-                                },
-                                 "synonym": {
-                                    "type": "string",
-                                    "analyzer": "nGram_analyzer"
+                                    "analyzer": "autocomplete",
+                                    "search_analyzer": "standard"
 
                                 },
-                                 "brand_name": {
+                                 "Synonym": {
                                     "type": "string",
-                                    "analyzer": "nGram_analyzer"
+                                    "analyzer": "autocomplete",
+                                    "search_analyzer": "standard"
+
+                                },
+                                "brand_name": {
+                                    "type": "string",
+                                    "analyzer": "autocomplete",
+                                    "search_analyzer": "standard"
+
+                                },
+                                "Definition": {
+                                    "type": "string",
+                                    "analyzer": "autocomplete",
+                                    "search_analyzer": "standard"
+
                                 }
                             }
                         }
@@ -277,6 +277,7 @@ class Indexer:
         sparql.append("WHERE {")
 
         if "graph" in self.conf:
+            print(self.conf["graph"])
             sparql.append(" GRAPH <%s> {" % self.conf["graph"])
 
         if "type" in self.conf:
@@ -518,21 +519,28 @@ def main(*args):
     if dryrun:
         args = args - dryrunOpts
 
+    loadOpts = set(("-l", "--load-only"))
+    loadOnly = args.intersection(loadOpts)
+    if loadOnly:
+        args = args - loadOpts
+
     if not args or args.intersection(set(("-h", "--help"))):
         print("Usage: %s [-d] [-h] [config]" % sys.argv[0])
         print("")
         print("-h --help     print this help")
+        print("-l --load-only do not delete existing index just load more docs")
         print("-d --dry-run  no network activities, just print the SPARQL")
         print("")
         print("See example.yaml for an example configuraton file")
         print("and README.md for details.")
         return 0
 
-    if len(args) > 1:
+    if len(args) > 2:
         print("Unexpected additional arguments:", " ".join(args), file=sys.stderr)
         return 1
-
-    session = Session(args.pop())
+    if loadOnly:
+        loadOnly = True
+    session = Session(args.pop(), loadOnly)
     session.check()
     if dryrun:
         print("### DRY RUN -- no indexes modified")

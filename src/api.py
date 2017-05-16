@@ -46,10 +46,10 @@ def elasticsearch():
     return es
 
 def es_search(query_string, branch, ops_type, limit):
-    s = Search(using=elasticsearch(), index=branch, doc_type=ops_type)
+    s = Search(using=elasticsearch(), index=(branch), doc_type=ops_type)
     s = s[0:int(limit)]
-    q = Q("multi_match", query=query_string, fields=['label^2', 'title^2', 'prefLabel^2', 'description', 'altLabel', 'Synonym', 'Definition'], fuzziness=1, type='best_fields')
-    s = s.highlight('label', 'title', 'description', 'prefLabel', 'description', 'altLabel', 'Synonym', 'Definition')
+    q = Q('multi_match', query=query_string, fields=['label^2', 'title^2', 'prefLabel^2', 'identifier', 'description', 'altLabel', 'Synonym', 'Definition'], fuzziness=1, type='best_fields')
+    s = s.highlight('label', 'title', 'identifier', 'description', 'prefLabel', 'description', 'altLabel', 'Synonym', 'Definition')
     s = s.query(q)
     es_response = s.execute()
     return es_response.to_dict()
@@ -78,6 +78,25 @@ def html_pre(json):
     """
     return template % cgi.escape(json_pretty(json))
 
+@get("/indexes")
+@produces(
+    default = "json",
+    #json = lambda **doc: doc,
+    json = lambda **doc: json_pretty(doc),
+    jsonld = lambda **doc: json.dumps(doc),
+    html = lambda **doc: html_pre(doc),
+    turtle = lambda **doc: render_rdf(doc, "turtle"),
+    rdfxml = lambda **doc: render_rdf(doc, "xml"),
+    nt = lambda **doc: render_rdf(doc, "nt")
+)
+def index_info():
+    response.content_type = 'application/json'
+    response.set_header("Access-Control-Allow-Origin", "*")
+    indexes = []
+    for index in conf.get("indexes"):
+      indexes.append(index)
+    return {"indexes": indexes}
+
 @get("/search")
 @get("/search/<query>")
 @produces(
@@ -94,7 +113,7 @@ def search_json(query=None):
     if query is None:
         # Get from ?q parameter instead, if exist
         query = request.query.query
-        branch = request.query.branch
+        branch = request.query.getall("branch")
         limit = request.query.limit
         ops_type = request.query.type
         options = request.query.getall("options")
@@ -106,6 +125,9 @@ def search_json(query=None):
         limit = "25"
     if ops_type == "":
         ops_type = None
+    if branch != "" and not set(branch).issubset(conf["indexes"].keys()):
+        response.status = 422
+        return {'error': 'One of your selected branches is not available for searching'}
     search = es_search(query, branch, ops_type, limit)
     if ops_type == None:
         search["type"] = "_all"
@@ -152,12 +174,14 @@ def search_json_post(query=None):
         ops_type = request.json["type"]
     if "options" in request.json:
         options = request.json["options"]
-
     response.set_header("Content-Location", id)
     # CORS header
     response.set_header("Access-Control-Allow-Origin", "*")
     if limit == None:
         limit = "25"
+    if branch != None and not set(branch).issubset(conf["indexes"].keys()):
+        response.status = 422
+        return {'error': 'One of your selected branches is not available for searching'}
     search = es_search(query, branch, ops_type, limit)
     if ops_type == None:
         search["type"] = "_all"

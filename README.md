@@ -82,6 +82,8 @@ You need to create a config file similar to
 
 To allow external access to the API you may need to change the webservice host setting in your version of the config file to eg '0.0.0.0'. You can also change the port where it is accessed. Note that we recommend that in production you run the API in a WSGI compatible webserver.
 
+The list of indexes that you specify in the conf file is used to restrict searches to those branches (see below). 
+
 A description of each element of the configuration follows below:
 
 ### ElasticSearch
@@ -299,9 +301,11 @@ properties must be present in the graph (match by pattern).
 
 The API has a fuzziness setting of 1 to allow for simple mispellings of eg Aspirin to Asprin. The `label` field has also been boosted by 2 which means that it takes precedence over other fields.
 
+To see the available indexes send a GET request to `/indexes`.
+
 ## Request and Response
 
-Send a GET request to `/search/` with your query as the last part of the URL eg. `http://example.com/search/pfd` or as the parameter `q` eg `http://example.com/search?q=pfd`. You can also include the branch to search for `b`, the type `t` and the limit `l` eg `http://example.com/search?q=asp&b=chebi&t=compound&l=10`. If you want only a list of the URIs of the hits then add an options array param which contains "uris_only".
+Send a GET request to `/search/` with your query as the last part of the URL eg. `http://example.com/search/pfd` or as the parameter `q` eg `http://example.com/search?q=pfd`. You can also include the branches to search for `b`, the type `t` and the limit `l` eg `http://example.com/search?q=asp&b=chebi&t=compound&l=10`. If you want only a list of the URIs of the hits then add an options array param which contains "uris_only". To search for multiple branches send an array listing them eg ["chebi", "chembl"].
 
 The branches are:
 * chebi
@@ -309,13 +313,20 @@ The branches are:
 * uniprot
 * drugbank
 * ocrs
+* go
+* wikipathways 
 
 The types are:
 * compound
 * target
 * enzyme
+* gene
 
-Or POST a query to `/search`with JSON data and the same params as for the GET query.
+Plus all the wikipathways organism types eg human, mouse.
+
+NOTE: depending on how your provider has chosen to index all the data you may have different branches and types. Ask them before searching.
+
+You can also POST a query to `/search`with JSON data and the same params as for the GET query.
 
 eg `curl -H "Content-Type: application/json" -X POST -d '{"query":"Lepirudin"}' http://localhost:8839/search`
 
@@ -391,6 +402,13 @@ Much the same as the standard Elastic Search response with the removal of the `_
     ]
 }
 ```
+Here is an example searching over chebi and chembl:
+
+`curl -H "Content-Type: application/json" -X POST -d '{"query":"abc", "limit": 50, "options: ["uris_only"], "branch": ["chebi"]}' http://localhost:8839/search`
+
+and the GET version
+
+`curl -X GET "http://localhost:8839/search?query=abc&branch=chebi&branch=chembl&type=compound&limit=50&options=uris_only" --globoff`
 
 ## Simple Web Application Demo
 There is a web page available via the root ie `http://localhost:8839` which demonstrates basic usage of the API. It provides a search box which will fetch results via `GET` when you type in it and a button which will `POST`. The ffirst 25 results are fetched and ordered with the highest hit first. Each result shows the highlight which returned the hit in bold.
