@@ -410,5 +410,16 @@ and the GET version
 
 `curl -X GET "http://localhost:8839/search?query=abc&branch=chebi&branch=chembl&type=compound&limit=50&options=uris_only" --globoff`
 
+## Autocomplete API
+When indexing data a set of filtered labels etc using nGrams of minimum size 3 are created to allow a simple autocompleter function. Send a query param to `/autocomplete`. An array of possible labels is sent back.
+eg for /autocomplete?query=sodium
+
+```json
+[
+  "value: "Sodium nitroprusside",
+  "value": "Sodium carbonate"
+]
+```
+
 ## Simple Web Application Demo
 There is a web page available via the root ie `http://localhost:8839` which demonstrates basic usage of the API. It provides a search box which will fetch results via `GET` when you type in it and a button which will `POST`. The ffirst 25 results are fetched and ordered with the highest hit first. Each result shows the highlight which returned the hit in bold.
