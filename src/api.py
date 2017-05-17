@@ -16,6 +16,7 @@ import mimerender
 import cgi
 import html
 import re
+from json import dumps
 
 mimerender.register_mime("turtle", ("text/turtle","text/n3"))
 mimerender.register_mime("rdfxml", ("application/rdf+xml", "application/xml"))
@@ -48,7 +49,16 @@ def elasticsearch():
 def es_search(query_string, branch, ops_type, limit):
     s = Search(using=elasticsearch(), index=(branch), doc_type=ops_type)
     s = s[0:int(limit)]
-    q = Q('multi_match', query=query_string, fields=['label^2', 'title^2', 'prefLabel^2', 'identifier', 'description', 'altLabel', 'Synonym', 'Definition'], fuzziness=1, type='best_fields')
+    q = Q('multi_match', query=query_string, fields=['label^3', 'title^3', 'prefLabel^3', 'identifier', 'description', 'altLabel', 'Synonym', 'Definition'], fuzziness=1, type='best_fields')
+    s = s.highlight('label', 'title', 'identifier', 'description', 'prefLabel', 'description', 'altLabel', 'Synonym', 'Definition')
+    s = s.query(q)
+    es_response = s.execute()
+    return es_response.to_dict()
+
+def es_autocomplete(query_string, branch, ops_type, limit):
+    s = Search(using=elasticsearch(), index=(branch), doc_type=ops_type)
+    s = s[0:int(limit)]
+    q = Q('multi_match', analyzer="autocomplete", query=query_string, fields=['label^3', 'title^3', 'prefLabel^3', 'identifier', 'description', 'altLabel', 'Synonym', 'Definition'])
     s = s.highlight('label', 'title', 'identifier', 'description', 'prefLabel', 'description', 'altLabel', 'Synonym', 'Definition')
     s = s.query(q)
     es_response = s.execute()
@@ -199,6 +209,44 @@ def search_json_post(query=None):
     else: 
       search.pop("_shards", None)
       return search
+
+@get("/autocomplete")
+def autocomplete_json():
+    query = request.query.query
+    branch = request.query.getall("branch")
+    limit = request.query.limit
+    ops_type = request.query.type
+    #options = request.query.getall("options")
+    id = quote(url("/search", query=query))
+    response.set_header("Content-Location", id)
+    # CORS header
+    response.set_header("Access-Control-Allow-Origin", "*")
+    response.content_type = 'application/json'
+    if limit == "":
+        limit = "25"
+    if ops_type == "":
+        ops_type = None
+    if branch != "" and not set(branch).issubset(conf["indexes"].keys()):
+        response.status = 422
+        return {'error': 'One of your selected branches is not available for searching'}
+    search = es_autocomplete(query, branch, ops_type, limit)
+    if ops_type == None:
+        search["type"] = "_all"
+    else:
+        search["type"] = ops_type
+    if branch == "":
+        search["branch"] = "_all"
+    else:
+       search["branch"] = branch
+    labels = []
+    for hit in search["hits"]["hits"]:
+      if "label" in hit["_source"]:
+        labels.append({"value": hit["_source"]["label"][0]})
+      elif "title" in hit["_source"]:
+        labels.append({"value": hit["_source"]["title"][0]})
+      elif "prefLabel" in hit["_source"]:
+        labels.append({"value": hit["_source"]["prefLabel"][0]})
+    return dumps(labels)
 
 def main(config_file, port="8839", *args):
     global conf

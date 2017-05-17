@@ -85,7 +85,7 @@ class Session:
                             "filter": {
                                 "autocomplete_filter": { 
                                     "type":     "edge_ngram",
-                                    "min_gram": 1,
+                                    "min_gram": 3,
                                     "max_gram": 20
                                 }
                             },
