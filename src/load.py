@@ -72,12 +72,11 @@ class Session:
         return "\n".join(sparql)
 
     def run(self):
-        print("hello")
         for index in self.conf["indexes"]:
           if not self.loadOnly:
             try:
                 res = self.es.indices.delete(index=index, ignore=404)
-                print("response : '%s'" % (res))
+                print("Delete index " + index + ", response : '%s'" % (res))
                 settings = {
                     "settings": {
                         "number_of_shards": 1, 
@@ -138,10 +137,11 @@ class Session:
                     }
                 }
                 res = self.es.indices.create(index=index, body=settings)
-                print(" response: '%s'" % (res))
+                print("Create index " + index + ", response: '%s'" % (res))
             except NotFoundError:
                 pass
             for doc_type in self.conf["indexes"][index]:
+                print("index " + index)
                 indexer = Indexer(self, index, doc_type)
                 ## TODO: Store mapping for JSON-LD
                 indexer.load()
@@ -332,7 +332,6 @@ class Indexer:
 
     def json_reader(self):
         url = self.sparqlURL()
-        print(url)
         with self.session.urlOpener.open(url) as jsonFile:
             bindings = ijson.items(jsonFile, "results.bindings.item")
             for binding in bindings:
