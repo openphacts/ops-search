@@ -241,12 +241,18 @@ def autocomplete_json():
     labels = []
     for hit in search["hits"]["hits"]:
       if "label" in hit["_source"]:
-        labels.append({"value": hit["_source"]["label"][0]})
+        labels.append(hit["_source"]["label"][0])
       elif "title" in hit["_source"]:
-        labels.append({"value": hit["_source"]["title"][0]})
+        labels.append(hit["_source"]["title"][0])
       elif "prefLabel" in hit["_source"]:
-        labels.append({"value": hit["_source"]["prefLabel"][0]})
-    return dumps(labels)
+        labels.append(hit["_source"]["prefLabel"][0])
+    # Remove duplicates
+    labels = set(labels)
+    labels = list(labels)
+    values = []
+    for label in labels:
+        values.append({"value": label})
+    return dumps(values)
 
 def main(config_file, port="8839", *args):
     global conf
