@@ -305,7 +305,7 @@ To see the available indexes send a GET request to `/indexes`.
 
 ## Request and Response
 
-Send a GET request to `/search/` with your query as the last part of the URL eg. `http://example.com/search/pfd` or as the parameter `q` eg `http://example.com/search?q=pfd`. You can also include the branches to search for `b`, the type `t` and the limit `l` eg `http://example.com/search?q=asp&b=chebi&t=compound&l=10`. If you want only a list of the URIs of the hits then add an options array param which contains "uris_only". To search for multiple branches send an array listing them eg ["chebi", "chembl"].
+Send a GET request to `/search/` with your query as the last part of the URL eg. `http://example.com/search/pfd` or as the parameter `query` eg `http://example.com/search?query=pfd`. You can also include the branches to search for `branch`, the type `type` and the limit `limit` eg `http://example.com/search?query=asp&branch=chebi&type=compound&limit=10`. If you want only a list of the URIs of the hits then add an options array param which contains "uris_only". To search for multiple branches send an array listing them eg ["chebi", "chembl"].
 
 The branches are:
 * chebi
