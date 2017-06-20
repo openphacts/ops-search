@@ -49,8 +49,8 @@ def elasticsearch():
 def es_search(query_string, branch, ops_type, limit):
     s = Search(using=elasticsearch(), index=(branch), doc_type=ops_type)
     s = s[0:int(limit)]
-    q = Q('multi_match', query=query_string, fields=['label^3', 'title^3', 'prefLabel^3', 'identifier', 'description', 'altLabel', 'Synonym', 'Definition'], fuzziness=1, type='best_fields')
-    s = s.highlight('label', 'title', 'identifier', 'description', 'prefLabel', 'description', 'altLabel', 'Synonym', 'Definition')
+    q = Q('multi_match', query=query_string, fields=['label^3', 'title^3', 'prefLabel^3', 'identifier', 'description', 'altLabel', 'Synonym', 'Definition'], fuzziness="AUTO", prefix_length=5, type='best_fields')
+    s = s.highlight('label', 'title', 'identifier', 'description', 'prefLabel', 'altLabel', 'Synonym', 'Definition')
     s = s.query(q)
     es_response = s.execute()
     return es_response.to_dict()
