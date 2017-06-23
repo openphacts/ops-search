@@ -404,7 +404,7 @@ Much the same as the standard Elastic Search response with the removal of the `_
 ```
 Here is an example searching over chebi and chembl:
 
-`curl -H "Content-Type: application/json" -X POST -d '{"query":"abc", "limit": 50, "options: ["uris_only"], "branch": ["chebi"]}' http://localhost:8839/search`
+`curl -H "Content-Type: application/json" -X POST -d '{"query":"abc", "limit": 50, "options": ["uris_only"], "branch": ["chebi"]}' http://localhost:8839/search`
 
 and the GET version
 
