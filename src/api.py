@@ -46,11 +46,14 @@ def elasticsearch():
     es = Elasticsearch(es_hosts)
     return es
 
-def es_search(query_string, branch, ops_type, limit):
+def es_search(query_string, branch, ops_type, limit, fuzzy):
     s = Search(using=elasticsearch(), index=(branch), doc_type=ops_type)
     s = s[0:int(limit)]
-    q = Q('multi_match', query=query_string, fields=['label^3', 'title^3', 'prefLabel^3', 'identifier', 'description', 'altLabel', 'Synonym', 'Definition'], fuzziness="AUTO", prefix_length=5, type='best_fields')
-    s = s.highlight('label', 'title', 'identifier', 'description', 'prefLabel', 'altLabel', 'Synonym', 'Definition')
+    if fuzzy:
+        q = Q('multi_match', query=query_string, fields=['label^4', 'title^3', 'prefLabel^4', '@id', 'description', 'altLabel^2', 'Synonym', 'Definition', 'shortName', 'mnemonic'], fuzziness="AUTO", prefix_length=5, type='best_fields', tie_breaker=0.3)
+    else:
+        q = Q('multi_match', query=query_string, fields=['label^4', 'title^3', 'prefLabel^4', '@id', 'description', 'altLabel^2', 'Synonym', 'Definition', 'shortName', 'mnemonic'], fuzziness=0, type='best_fields', tie_breaker=0.3)
+    s = s.highlight('label', 'title', '@id', 'description', 'prefLabel', 'altLabel', 'Synonym', 'Definition', 'shortName', 'mnemonic')
     s = s.query(q)
     es_response = s.execute()
     return es_response.to_dict()
@@ -58,7 +61,7 @@ def es_search(query_string, branch, ops_type, limit):
 def es_autocomplete(query_string, branch, ops_type, limit):
     s = Search(using=elasticsearch(), index=(branch), doc_type=ops_type)
     s = s[0:int(limit)]
-    q = Q('multi_match', analyzer="autocomplete", query=query_string, fields=['label^3', 'title^3', 'prefLabel^3', 'altLabel'])
+    q = Q('multi_match', analyzer="autocomplete", query=query_string, fields=['label^3', 'title^3', 'prefLabel^3', 'altLabel^2'])
     #s = s.highlight('label', 'title', 'identifier', 'description', 'prefLabel', 'description', 'altLabel', 'Synonym', 'Definition')
     s = s.query(q)
     es_response = s.execute()
@@ -127,10 +130,13 @@ def search_json(query=None):
         limit = request.query.limit
         ops_type = request.query.type
         options = request.query.getall("options")
+    fuzzy = False
     id = quote(url("/search/<query>", query=query))
     response.set_header("Content-Location", id)
     # CORS header
     response.set_header("Access-Control-Allow-Origin", "*")
+    if options != None and "fuzzy" in options:
+        fuzzy = True
     if limit == "":
         limit = "25"
     if ops_type == "":
@@ -138,7 +144,7 @@ def search_json(query=None):
     if branch != "" and not set(branch).issubset(conf["indexes"].keys()):
         response.status = 422
         return {'error': 'One of your selected branches is not available for searching'}
-    search = es_search(query, branch, ops_type, limit)
+    search = es_search(query, branch, ops_type, limit, fuzzy)
     if ops_type == None:
         search["type"] = "_all"
     else:
@@ -184,15 +190,18 @@ def search_json_post(query=None):
         ops_type = request.json["type"]
     if "options" in request.json:
         options = request.json["options"]
+    fuzzy = False
     response.set_header("Content-Location", id)
     # CORS header
     response.set_header("Access-Control-Allow-Origin", "*")
+    if options != None and "fuzzy" in options:
+        fuzzy = True
     if limit == None:
         limit = "25"
     if branch != None and not set(branch).issubset(conf["indexes"].keys()):
         response.status = 422
         return {'error': 'One of your selected branches is not available for searching'}
-    search = es_search(query, branch, ops_type, limit)
+    search = es_search(query, branch, ops_type, limit, fuzzy)
     if ops_type == None:
         search["type"] = "_all"
     else:
