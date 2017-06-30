@@ -20,6 +20,7 @@ See [LICENSE](LICENSE) for details.
 The additional Python libraries used are:
 
 * [elasticsearch](https://pypi.python.org/pypi/elasticsearch/) ([Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0))
+* [elasticsearch-dsl](https://pypi.python.org/pypi/elasticsearch-dsl) ([Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0))
 * [ijson](https://pypi.python.org/pypi/ijson/) ([BSD license](https://github.com/isagalaev/ijson/blob/master/LICENSE.txt))
 * [PyYaml](https://pypi.python.org/pypi/pyaml/) ([WTFPL license](https://github.com/mk-fg/pretty-yaml/blob/master/COPYING))
 * [ijson](https://pypi.python.org/pypi/ijson/) ([BSD license](https://github.com/isagalaev/ijson/blob/master/LICENSE.txt))
@@ -36,7 +37,7 @@ You will need Python 3 and pip, in addition to some dependencies.
 In Ubuntu 14.04, this easiest achieved using:
 
     sudo apt-get install git python3-pip libyajl2 python3-yaml python3-bottle
-    sudo pip3 install elasticsearch ijson yajl mimerender rdflib rdflib-jsonld
+    sudo pip3 install elasticsearch elasticsearch-dsl ijson yajl mimerender rdflib rdflib-jsonld
 
 You will also need an [ElasticSearch](http://www.elasticsearch.org)
 installation (tested with version 1.4), with dynamic Groovy [scripting
@@ -46,7 +47,7 @@ The simplest way to do this is to use the [included elasticsearch](elasticsearch
 
     docker run --name elasticsearch -d -p 9200:9200 openphacts/ops-search-elasticsearch
 
-You verify this install at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)  
+Verify this install at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)  
 
 _Note: On OSX & Windows you may need to find the actual IP address that [boot2docker](https://github.com/boot2docker) is using. Try `boot2docker ip` and then use that when testing in a browser eg `http://192.168.59.103:9200/_search?q=alice`_
 
