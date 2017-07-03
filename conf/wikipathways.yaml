@@ -25,7 +25,9 @@ sparql:
 
 common_properties:
   - dct:identifier
-  - dc:title
+  - sparql: dct:title
+    variable: label
+    jsonld: label
   - dct:description
   - wp:organismName
 
