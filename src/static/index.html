@@ -93,6 +93,8 @@ function explorer_uri(hit) {
       return "https://explorer.openphacts.org/targets?uri=" + hit["_id"];
   } else if (hit["_type"] == "enzyme") {
       return "https://explorer.openphacts.org/enzyme?uri=" + hit["_id"];
+  } else {
+      return null;
   }
 }
 
@@ -125,8 +127,12 @@ function render_hit(hit, inc_score) {
    var ignoreKeys = ["@id", "@type", "@chemblId", "rdfs:subClassOf"]
    doc = hit["_source"];
    names = merge_lists(doc);
-   name = names[0]; // fallback: URI from hit._id
-
+   if (doc["label"]) {
+       name = doc["label"];
+   } else {
+      // Use something
+      name = names[0]; // fallback: URI from hit._id
+   }
    if (hit.hasOwnProperty("highlight")) {
      // Only show highlighted fields
       h = hit.highlight;
@@ -137,11 +143,26 @@ function render_hit(hit, inc_score) {
       var otherDoc = names.unshift(name);    
       descs = uniq(otherDoc).slice(1);;
     }
-   html = "<li><a href='" + explorer_uri(hit) + "'>" + name + "</a>" + 
+   var link_to_explorer = explorer_uri(hit);
+   var html;
+   if(link_to_explorer !== null) {
+      html = "<li><a href='" + link_to_explorer + "'>" + name + "</a>" + 
      " <em class='type'>" +  hit["_source"]["@type"][0] +  "</em> " +
      "<small>" + 
        descs.map(render_desc) + "</small> " +
 			"<em>" + (Object.keys(doc).includes("organism") ? doc.organism[0] : "") + "</em> ";
+   } else {
+     html = "<li><b>" + name + "</b>" + 
+     " <em class='type'>" +  hit["_source"]["@type"][0] +  "</em> " +
+     "<small>" + 
+       descs.map(render_desc) + "</small> " +
+			"<em>" + (Object.keys(doc).includes("organism") ? doc.organism[0] : "") + "</em> ";
+   }
+//   html = "<li><a href='" + explorer_uri(hit) + "'>" + name + "</a>" + 
+//     " <em class='type'>" +  hit["_source"]["@type"][0] +  "</em> " +
+//     "<small>" + 
+//       descs.map(render_desc) + "</small> " +
+//			"<em>" + (Object.keys(doc).includes("organism") ? doc.organism[0] : "") + "</em> ";
  if(inc_score) {
   html = html + "<span class='score'>" + Math.round( hit["_score"] * 100 ) / 100; + "</span>" ; 
  }
@@ -196,7 +217,7 @@ $("#q").on("input", function () {
   $("#tmpresults").show();
   $("#tmpresultlist").empty();
   $("#tmpstats").empty();
-  var search=$("#q").val() + "*";
+  var search=$("#q").val();// + "*";
 
   $.getJSON('search?query=' + search, function(data) {
     $("#tmpresultlist").empty();
