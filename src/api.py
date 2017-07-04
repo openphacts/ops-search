@@ -50,10 +50,10 @@ def es_search(query_string, branch, ops_type, limit, fuzzy):
     s = Search(using=elasticsearch(), index=(branch), doc_type=ops_type)
     s = s[0:int(limit)]
     if fuzzy:
-        q = Q('multi_match', query=query_string, fields=['label^4', 'title^3', 'prefLabel^4', 'identifier', 'description', 'altLabel^2', 'Synonym', 'Definition', 'shortName', 'mnemonic'], fuzziness="AUTO", prefix_length=5, type='best_fields', tie_breaker=0.3)
+        q = Q('multi_match', query=query_string, fields=['label^4', 'title^3', 'prefLabel^4', 'identifier', 'description', 'altLabel^2', 'Synonym', 'Definition', 'shortName', 'mnemonic', 'disease_class'], fuzziness="AUTO", prefix_length=5, type='best_fields', tie_breaker=0.3)
     else:
-        q = Q('multi_match', query=query_string, fields=['label^4', 'title^3', 'prefLabel^4', 'identifier', 'description', 'altLabel^2', 'Synonym', 'Definition', 'shortName', 'mnemonic'], fuzziness=0, type='best_fields', tie_breaker=0.3)
-    s = s.highlight('label', 'title', 'identifier', 'description', 'prefLabel', 'altLabel', 'Synonym', 'Definition', 'shortName', 'mnemonic')
+        q = Q('multi_match', query=query_string, fields=['label^4', 'title^3', 'prefLabel^4', 'identifier', 'description', 'altLabel^2', 'Synonym', 'Definition', 'shortName', 'mnemonic', 'disease_class'], fuzziness=0, type='best_fields', tie_breaker=0.3)
+    s = s.highlight('label', 'title', 'identifier', 'description', 'prefLabel', 'altLabel', 'Synonym', 'Definition', 'shortName', 'mnemonic', 'disease_class')
     s = s.query(q)
     es_response = s.execute()
     return es_response.to_dict()
