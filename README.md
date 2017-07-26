@@ -47,7 +47,9 @@ The simplest way to do this is to use the [included elasticsearch](elasticsearch
 
     docker run --name elasticsearch -d -p 9200:9200 openphacts/ops-search-elasticsearch
 
-Verify this install at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)  
+If `docker ps` does not show it as running then look at the logs with `docker logs elasticsearch`. It is possible that on Linux you may see the error `max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]`. Try setting `max_map_count_value` with `sudo sysctl -w vm.max_map_count=262144`. You can also change it in `/etc/sysctl.conf` but you may have to reboot.
+
+Verify that elastic search is running at: [http://localhost:9200/_search?q=alice](http://localhost:9200/_search?q=alice)  
 
 _Note: On OSX & Windows you may need to find the actual IP address that [boot2docker](https://github.com/boot2docker) is using. Try `boot2docker ip` and then use that when testing in a browser eg `http://192.168.59.103:9200/_search?q=alice`_
 
