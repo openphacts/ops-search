@@ -146,15 +146,21 @@ function render_hit(hit, inc_score) {
     }
    var link_to_explorer = explorer_uri(hit);
    var html;
+   var source_type;
+   if (hit["_source"]["@type"] != null) {
+     source_type = hit["_source"]["@type"][0];
+   } else {
+     source_type = hit["_type"];
+   }
    if(link_to_explorer !== null) {
       html = "<li><a href='" + link_to_explorer + "'>" + name + "</a>" + 
-     " <em class='type'>" +  hit["_source"]["@type"][0] +  "</em> " +
+     " <em class='type'>" +  source_type +  "</em> " +
      "<small>" + 
        descs.map(render_desc) + "</small> " +
 			"<em>" + (Object.keys(doc).includes("organism") ? doc.organism[0] : "") + "</em> ";
    } else {
      html = "<li><b>" + name + "</b>" + 
-     " <em class='type'>" +  hit["_source"]["@type"][0] +  "</em> " +
+     " <em class='type'>" +  source_type +  "</em> " +
      "<small>" + 
        descs.map(render_desc) + "</small> " +
 			"<em>" + (Object.keys(doc).includes("organism") ? doc.organism[0] : "") + "</em> ";
@@ -167,9 +173,15 @@ function render_hit(hit, inc_score) {
  if(inc_score) {
   html = html + "<span class='score'>" + Math.round( hit["_score"] * 100 ) / 100; + "</span>" ; 
  }
+ var doc_type;
+ if (doc["@type"] != null) {
+     doc_type = doc["@type"][0];
+ } else {
+     doc_type = source_type;
+ }
  html = html + " <code class='turtle'> &lt;<a href='" + hit["_id"] + "'>" + 
      hit["_id"] + "</a>&gt; a " + 
-     doc["@type"][0] + " .</code>"+ 
+     doc_type + " .</code>"+ 
 //     " <small class='index'>" + hit._index + "</small> " + 
      "</li>";
  return html;
