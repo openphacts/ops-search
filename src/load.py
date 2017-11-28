@@ -4,6 +4,7 @@ import time
 import json
 import uuid
 import collections
+import urllib3
 from urllib.request import FancyURLopener
 from urllib.parse import urljoin, quote, urlencode, unquote, urlparse
 
@@ -332,13 +333,16 @@ class Indexer:
 
     def json_reader(self):
         url = self.sparqlURL()
-        with self.session.urlOpener.open(url) as jsonFile:
-            bindings = ijson.items(jsonFile, "results.bindings.item")
-            for binding in bindings:
-                n = self.binding_as_doc(binding)
-                if n is not None:
+        http = urllib3.PoolManager()
+        resp = http.request('GET', url, retries=urllib3.Retry(3, redirect=2), headers = {"Accept": "application/sparql-results+json, applicaton/json;q=0.1"})
+        #with self.session.urlOpener.open(url) as jsonFile:
+        jsonDoc = json.loads(resp.data.decode('utf-8'))
+        bindings = jsonDoc['results']['bindings']
+        for binding in bindings:
+            n = self.binding_as_doc(binding)
+            if n is not None:
 #                    print(n)
-                    yield n
+                yield n
 
     def skolemize(self, bnode):
         if bnode not in self.blanknodes:
