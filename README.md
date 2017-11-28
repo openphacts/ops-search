@@ -37,7 +37,7 @@ You will need Python 3 and pip, in addition to some dependencies.
 In Ubuntu 14.04, this easiest achieved using:
 
     sudo apt-get install git python3-pip libyajl2 python3-yaml python3-bottle
-    sudo pip3 install elasticsearch elasticsearch-dsl ijson yajl mimerender rdflib rdflib-jsonld
+    sudo pip3 install elasticsearch elasticsearch-dsl ijson yajl mimerender rdflib rdflib-jsonld urllib3
 
 You will also need an [ElasticSearch](http://www.elasticsearch.org)
 installation (tested with version 1.4), with dynamic Groovy [scripting
