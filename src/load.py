@@ -334,15 +334,19 @@ class Indexer:
     def json_reader(self):
         url = self.sparqlURL()
         http = urllib3.PoolManager()
-        resp = http.request('GET', url, retries=urllib3.Retry(3, redirect=2), headers = {"Accept": "application/sparql-results+json, applicaton/json;q=0.1"})
+        resp = http.request('GET', url, retries=urllib3.Retry(5, redirect=2), headers = {"Accept": "application/sparql-results+json, applicaton/json;q=0.1"})
         #with self.session.urlOpener.open(url) as jsonFile:
-        jsonDoc = json.loads(resp.data.decode('utf-8'))
-        bindings = jsonDoc['results']['bindings']
-        for binding in bindings:
-            n = self.binding_as_doc(binding)
-            if n is not None:
+        try:
+            jsonDoc = json.loads(resp.data.decode('utf-8'))
+            bindings = jsonDoc['results']['bindings']
+            for binding in bindings:
+                n = self.binding_as_doc(binding)
+                if n is not None:
 #                    print(n)
-                yield n
+                    yield n
+        except:
+            print("Data error: " + resp.data.decode(encoding='UTF-8'))
+            pass
 
     def skolemize(self, bnode):
         if bnode not in self.blanknodes:
